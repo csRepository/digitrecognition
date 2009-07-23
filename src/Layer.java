@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 
-
 public class Layer{
 	
 	public ArrayList neurons;
@@ -13,7 +12,11 @@ public class Layer{
 	      neurons.add(new Neuron());
 	    }
 	}
-	
+	/**
+         * Zwraca referencjê do obiektu Neuron
+         * @param n numer neuronu
+         * @return Neuron
+         */
 	public Neuron getNeuron(int n) {
 		return (Neuron) neurons.get(n);
 	  }
