@@ -1,15 +1,15 @@
 import java.util.ArrayList;
 
-public class Layer{
+public class Layer extends ArrayList{
 	
-	public ArrayList neurons;
+	//public ArrayList neurons;
 
 	public Layer (int n) {
-		neurons = new ArrayList();
+		//neurons = new ArrayList();
 		for(int i=0;i<n;i++)
 	    {
 	     
-	      neurons.add(new Neuron());
+	      add(new Neuron());
 	    }
 	}
 	/**
@@ -18,6 +18,6 @@ public class Layer{
          * @return Neuron
          */
 	public Neuron getNeuron(int n) {
-		return (Neuron) neurons.get(n);
+		return (Neuron) get(n);
 	  }
 }

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 public class NeuralNet {
 	
 	public ArrayList layers;
-	public Layer inputLayer;
-	public Layer outputLayer;
 
 	public NeuralNet() {
 		layers = new ArrayList();
@@ -41,4 +39,17 @@ public class NeuralNet {
 		new Synapse(getLayer(sourceLayer).getNeuron(sourceNeuron),
               getLayer(destLayer).getNeuron(destNeuron));
 	}
+        public void propagate(){
+            Neuron neuron;
+            int out = 0; //czy aktualna warstwa to war. wyjsciowa (0 - nie)
+            for (int i=1;i<layers.size();i++) {
+                Layer layer = getLayer(i);
+                if (i==layers.size()-1) out=1;
+                for (int j=0;j<layer.size()-1+out;j++) {
+                    neuron = (Neuron) layer.getNeuron(j);
+                    neuron.computeOutput();
+                    System.out.println("neuron("+j+")="+neuron.getValue());
+		}
+            }
+        }
 }
