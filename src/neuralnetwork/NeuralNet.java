@@ -1,10 +1,19 @@
+package neuralnetwork;
+
+import neuralnetwork.Layer;
+import neuralnetwork.Neuron;
+import neuralnetwork.Synapse;
 import java.util.ArrayList;
 
-
+/**
+ * Klasa implementuj¹ca sieæ neuronow¹.
+ * @author tm
+ */
 public class NeuralNet {
 	
 	public ArrayList layers;
-
+        private double globalError;
+        private double size;
 	public NeuralNet() {
 		layers = new ArrayList();
 	}
@@ -27,7 +36,7 @@ public class NeuralNet {
 	}
 
         /**
-         * Tworzy po³¹czenie pomiêdzy neuronami
+         * Tworzy po³¹czenie (synapsê) pomiêdzy dwoma neuronami
          * @param sourceLayer   numer warstwy, z której wychodzi po³¹czenie
          * @param sourceNeuron  numer neuronu, z którego wychodzi po³¹czenie
          * @param destLayer     numer warstwy docelowej po³¹czenia
@@ -39,6 +48,11 @@ public class NeuralNet {
 		new Synapse(getLayer(sourceLayer).getNeuron(sourceNeuron),
               getLayer(destLayer).getNeuron(destNeuron));
 	}
+
+        /**
+         * Obliczenie wyjsc neuronow poczynajac od warstwy wejsciowej w
+         * kierunku wyjsciowej
+         */
         public void propagate(){
             Neuron neuron;
             int out = 0; //czy aktualna warstwa to war. wyjsciowa (0 - nie)
@@ -51,5 +65,38 @@ public class NeuralNet {
                     System.out.println("neuron("+j+")="+neuron.getValue());
 		}
             }
+        }
+
+        /**
+         * Obliczenie bledu dla kazdego neuronu wyjsciwego na podstawie
+         * wartosci porz¹danych oraz sumy kwadratow wszystkich bledow
+         * danego wzorca
+         * @param desAns tablica porzdanych odpowiedzi
+         */
+        public void calculateError(int [] desAns) {
+            Layer layer = getLayer(layers.size()-1);
+            size = desAns.length;
+             double error;
+            for (int i=0;i<layer.size();i++) {
+                error=desAns[i]-layer.getNeuron(i).getValue();
+                System.out.println(error);
+                globalError += error*error;
+              //  System.out.println("size"+size);
+
+            }
+        }
+
+        /**
+         * Obliczenie bledu sredniokwadratowego (root mean square)
+         * @return zwraca blad rms dla jednej epoki
+         */
+        public double calculateRMS() {
+            double errorRMS = Math.sqrt(globalError/size);
+            this.globalError=0;
+            return errorRMS;
+        }
+
+        public void backPropagate() {
+
         }
 }

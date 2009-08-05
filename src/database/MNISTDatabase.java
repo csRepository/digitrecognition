@@ -17,8 +17,8 @@ import java.io.*;
 
 public class MNISTDatabase  {
 
-    public MNISTImageFile trainImgF,testImgF;
-    public MNISTLabelFile trainLblF,testLblF;
+    private static MNISTImageFile trainImgF,testImgF;
+    private static MNISTLabelFile trainLblF,testLblF;
     private String trainImgFPath = "../digitDatabase/train-images-idx3-ubyte";
     private String trainLblFPath = "../digitDatabase/train-labels-idx1-ubyte";
     private String testImgFPath = "../digitDatabase/t10k-images-idx3-ubyte";
@@ -38,6 +38,25 @@ public class MNISTDatabase  {
 	System.exit(0);
       }
     }
+          public int[][] readImage(String kind,int nr) {
+            MNISTImageFile imgFile;
+            if (kind.equals("training"))
+                imgFile = trainImgF;
+             else
+                imgFile = testImgF;
+                imgFile.setCurr(nr);      //obraz
+                return imgFile.readData();
+        }
+         public int readLabel(String kind,int nr) {
+            MNISTLabelFile lblFile;
+            if (kind.equals("training"))
+                lblFile = trainLblF;
+             else
+                lblFile = testLblF;
+                lblFile.setCurr(nr);      //etykieta
+                System.out.println();
+                return lblFile.readData();
+        }
 }
 
 
