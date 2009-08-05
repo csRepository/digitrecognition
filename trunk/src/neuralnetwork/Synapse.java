@@ -1,5 +1,12 @@
+package neuralnetwork;
+
 import java.util.Random;
 
+/**
+ * Klasa uzywana w celu stworzenia synapsy - polaczenia pomiedzy
+ * dwoma neuronami sasiednich warstw
+ * @author tm
+ */
 public class Synapse {
 
 	private double value;

@@ -1,5 +1,12 @@
+package neuralnetwork;
+
 import java.util.ArrayList;
 
+/**
+ * Klasa implementuj¹ca warstwê sieci neuronowej. Ka¿da warstwa zawiera
+ * listê neuronów.
+ * @author tm
+ */
 public class Layer extends ArrayList{
 	
 	//public ArrayList neurons;

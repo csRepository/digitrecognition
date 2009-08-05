@@ -1,6 +1,7 @@
-import database.MNISTDatabase;
-import database.MNISTImageFile;
-import database.MNISTLabelFile;
+import neuralnetwork.NeuralNet;
+import neuralnetwork.Layer;
+import neuralnetwork.Neuron;
+import database.*;
 
 
 public class Main {
@@ -20,7 +21,7 @@ public class Main {
 		// TODO Auto-generated method stub
 
                 nIn=28*28+1; //wielkosc obrazu + bias
-                nHidd=15+1;  //l. neuronow + bias
+                nHidd=nIn*2/3+1;  //l. neuronow + bias
                 nOut=10;
 		neuralNetwork = new NeuralNet(); 	// tworzenie sieci neuronwej
 		neuralNetwork.addLayer(nIn);	   		// dodanie warstwy wejsciowej
@@ -33,14 +34,15 @@ public class Main {
 
                 //wczytywanie obrazu z bazy MNIST
                 Data = new MNISTDatabase();
-                int [][] image = readImage("training",4);
+                int [][] image = Data.readImage("training",5);
+                int label = Data.readLabel("training",5);
+                System.out.println(label);
 
                 int neuNr=0;
                 for (int j=0;j<image.length;j++) {
                     for (int k=0;k<image.length;k++) {
                         double vn=normalize(image[j][k],255,0,1,0);
-                        Neuron = (Neuron) InputLayer.getNeuron(neuNr);
-                        Neuron.setValue(vn);
+                        InputLayer.getNeuron(neuNr).setValue(vn);
                         neuNr++;
                     }
                 }
@@ -51,22 +53,20 @@ public class Main {
                  connLayer(nHidd, nOut,1,2);
                  neuralNetwork.propagate();
 
-                 int [][] array = initAnsLay();
-
-                 for (int i=0;i<10;i++) {
-                     String str="";
-                    for (int j=0;j<nOut;j++) {
-                        str=str+array[i][j];
-                    }
-                 System.out.println(str);
-                 }
+                 int [] desiredAns = readDesiredAns(label);
+                 neuralNetwork.calculateError(desiredAns);
+                 double rms = neuralNetwork.calculateRMS();
+                 System.out.println(rms);
+             //    System.out.println(InputLayer.getNeuron(0).outlinks.size());   //sprawdzenie ilsoci polaczen z neuronu
+             //    System.out.println(HiddenLayer.getNeuron(HiddenLayer.size()-2).outlinks.size());
         }
         private static double normalize(int value,int max,int min,int new_max,int new_min) {
             double new_value = (value-min)/(max-min)*(new_max-new_min)+new_min;
             return new_value;
         }
         /**
-         *
+         * Tworzy po³¹czenie pomiêdzy wszystkimi neuronami dwóch warstw
+         * (³¹czy warstwy ze sob¹)
          * @param layer warstwa
          * @param n liczba neuronow war. 1
          * @param n1 liczba neuronow war. 2
@@ -84,39 +84,14 @@ public class Main {
         }
 
 
-        private static int[][] readImage(String kind,int nr) {
-            MNISTImageFile imgFile;
-            MNISTLabelFile lblFile;
-            if (kind.equals("training")) {
-                imgFile = Data.trainImgF;
-                lblFile = Data.trainLblF;
-            } else {
-                imgFile = Data.testImgF;
-                lblFile = Data.testLblF;
-            }
-                imgFile.setCurr(nr);      //obraz
-                lblFile.setCurr(nr);      //etykieta
-                System.out.println(lblFile.readData());
-                int [][] image = imgFile.readData();
-                return image;
-        }
-        private static int [][] initAnsLay() {
-            Layer ansLayer= new Layer(nOut);
-            int [][] array = new int[nOut][nOut];
-            for (int i=0;i<ansLayer.size();i++) {
-                for (int j=0;j<nOut;j++) {
-                    if (i==j) {
-                        array[i][j]=1;
-                    }
-                    else
-                        array[i][j]=0;
-               //     array[i][j]=0;
-                //    array[i][i]=1;
-                }
 
+        
+        private static int [] readDesiredAns(int digit) {
+            int [] d = new int[nOut];
+            for (int i=0;i<nOut;i++) {
+                d[i]=0;
             }
-            return array;
+            d[digit]=1;
+            return d;
         }
 }
-   //poprawic strukture sieci glownie bias, wypisac wagi(inlinks,outlinks - czy bias
-        // ma tez inlinks? - sprawdzic)
