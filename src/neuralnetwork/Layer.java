@@ -7,17 +7,16 @@ import java.util.ArrayList;
  * listê neuronów.
  * @author tm
  */
-public class Layer extends ArrayList{
+public class Layer extends ArrayList {
 	
-	//public ArrayList neurons;
+	//private ArrayList neurons;
 
 	public Layer (int n) {
 		//neurons = new ArrayList();
 		for(int i=0;i<n;i++)
-	    {
-	     
-	      add(new Neuron());
-	    }
+                {
+                    add(new Neuron());
+                }
 	}
 	/**
          * Zwraca referencjê do obiektu Neuron

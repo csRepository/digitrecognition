@@ -9,25 +9,89 @@ import java.util.Random;
  */
 public class Synapse {
 
-	private double value;
-	public Neuron from;
-	public Neuron to;
-	private Random random = new Random();
+    private double value;
+    private double delta; //rprop and backprop weight change
+    private double gradient ;  //weight gradient
+    private double weightChange;
+    private Neuron fromNeuron;
+    private Neuron toNeuron;
+    private Random random = new Random();
 
-	public Synapse(Neuron f, Neuron t) {
-		from = f;
-		to = t;
-		t.inlinks.add(this);
-		f.outlinks.add(this);
-		value = random.nextDouble() / 5.0;
-	}
-	
-	public void setValue(double value) {
-		this.value = value;
-	}
-	
-	public double getValue() {
-		return this.value;
-	}
-	
+    public Synapse(Neuron f, Neuron t) {
+            fromNeuron = f;
+            toNeuron = t;
+            t.getIncomingSyn().add(this);
+            f.getOutgoingSyn().add(this);
+            value = random.nextDouble()*2*0.2-0.2;
+    }
+
+    /**
+     * @return the fromNeuron
+     */
+    public Neuron getFromNeuron() {
+        return fromNeuron;
+    }
+
+    /**
+     * @return the toNeuron
+     */
+    public Neuron getToNeuron() {
+        return toNeuron;
+    }
+
+    /**
+     * @return the data
+     */
+    public double getDelta() {
+        return delta;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public void setDelta(double delta) {
+        this.delta = delta;
+    }
+
+    /**
+     * @return the value
+     */
+    public double getValue() {
+        return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    /**
+     * @return the partDerivative
+     */
+    public double getGradient() {
+        return gradient;
+    }
+
+    /**
+     * @param partDerivative the partDerivative to set
+     */
+    public void setGradient(double gradient) {
+        this.gradient = gradient;
+    }
+
+    /**
+     * @return the weightChange
+     */
+    public double getWeightChange() {
+        return weightChange;
+    }
+
+    /**
+     * @param weightChange the weightChange to set
+     */
+    public void setWeightChange(double weightChange) {
+        this.weightChange = weightChange;
+    }
 }

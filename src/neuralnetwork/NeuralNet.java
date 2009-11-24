@@ -1,8 +1,5 @@
 package neuralnetwork;
 
-import neuralnetwork.Layer;
-import neuralnetwork.Neuron;
-import neuralnetwork.Synapse;
 import java.util.ArrayList;
 
 /**
@@ -11,10 +8,11 @@ import java.util.ArrayList;
  */
 public class NeuralNet {
 	
-	public ArrayList layers;
+	private ArrayList layers;
         private double globalError;
-        private double size;
-	public NeuralNet() {
+        private double size;    //wielkosc zbioru wzorcow
+
+        public NeuralNet() {
 		layers = new ArrayList();
 	}
 
@@ -26,14 +24,13 @@ public class NeuralNet {
 		 //new Layer(n);
 		 layers.add(new Layer(n));
 	}
-	/**
-         * Zwraca referencjê do warstwy
-         * @param n numer warstwy
-         * @return Layer
-         */
 	public Layer getLayer(int n) {
 		return (Layer) layers.get(n);
 	}
+        public ArrayList getLayers() {
+            return layers;
+        }
+
 
         /**
          * Tworzy po³¹czenie (synapsê) pomiêdzy dwoma neuronami
@@ -62,24 +59,25 @@ public class NeuralNet {
                 for (int j=0;j<layer.size()-1+out;j++) {
                     neuron = (Neuron) layer.getNeuron(j);
                     neuron.computeOutput();
-                    System.out.println("neuron("+j+")="+neuron.getValue());
+                  //  System.out.println("neuron("+j+")="+neuron.getValue());
 		}
             }
         }
 
         /**
          * Obliczenie bledu dla kazdego neuronu wyjsciwego na podstawie
-         * wartosci porz¹danych oraz sumy kwadratow wszystkich bledow
+         * wartosci porzadanych oraz sumy kwadratow wszystkich bledow
          * danego wzorca
-         * @param desAns tablica porzdanych odpowiedzi
+         * @param desAns tablica porzadanych odpowiedzi
          */
         public void calculateError(int [] desAns) {
             Layer layer = getLayer(layers.size()-1);
-            size = desAns.length;
+            size += desAns.length;  //liczba przetworzonych wzorcow
+          // size = 1;
              double error;
             for (int i=0;i<layer.size();i++) {
-                error=desAns[i]-layer.getNeuron(i).getValue();
-                System.out.println(error);
+                error = desAns[i]-layer.getNeuron(i).getValue();
+            //    System.out.println(error);
                 globalError += error*error;
               //  System.out.println("size"+size);
 
@@ -88,15 +86,13 @@ public class NeuralNet {
 
         /**
          * Obliczenie bledu sredniokwadratowego (root mean square)
-         * @return zwraca blad rms dla jednej epoki
+         * @return zwraca blad rms
          */
         public double calculateRMS() {
             double errorRMS = Math.sqrt(globalError/size);
+            this.size=0;
             this.globalError=0;
             return errorRMS;
         }
 
-        public void backPropagate() {
-
-        }
 }
