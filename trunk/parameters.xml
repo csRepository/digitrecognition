@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : newXMLDocument.xml
+    Created on : 7 grudzień 2009, 09:40
+    Author     : tm
+    Description:
+        Purpose of the document follows.
+-->
+
+<network>
+    <structure>
+        <hidden>25</hidden> <!-- nie uwzgledniajac neuronu bias-->
+    </structure>
+    <algorithm>
+        <name>backprop</name>
+        <parameter attr="learning_rate">0.1</parameter>
+        <parameter attr="momentum">0.9</parameter>
+    </algorithm>
+    <algorithm>
+         <name>rprop</name>
+    </algorithm>
+     <algorithm>
+         <name>quickprop</name>
+    </algorithm>
+</network>
