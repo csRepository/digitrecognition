@@ -35,7 +35,9 @@ public abstract class Propagation {
   public void resetSyn(Neuron neuron) {
        for (int i=0;i<neuron.getIncomingSyn().size();i++) {
             Synapse syn = neuron.getIncomingSyn().get(i);
-         // syn.setDelta(0);
+            syn.setPrevDelta(syn.getDelta());
+            //syn.setDelta(0);
+            syn.setPrevGradient(syn.getGradient());
             syn.setGradient(0);
        }
     }

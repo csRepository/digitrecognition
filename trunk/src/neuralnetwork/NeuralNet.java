@@ -3,7 +3,7 @@ package neuralnetwork;
 import java.util.ArrayList;
 
 /**
- * Klasa implementuj¹ca sieæ neuronow¹.
+ * Klasa implementujï¿½ca sieï¿½ neuronowï¿½.
  * @author tm
  */
 public class NeuralNet {
@@ -17,8 +17,8 @@ public class NeuralNet {
 	}
 
 	/**
-	 * Metoda dodaj¹ca warstwê do struktury sieci
-	 * @param n liczba neuronów
+	 * Metoda dodajï¿½ca warstwï¿½ do struktury sieci
+	 * @param n liczba neuronï¿½w
 	 */
 	public void addLayer(int n) {
 		 //new Layer(n);
@@ -33,10 +33,10 @@ public class NeuralNet {
 
 
         /**
-         * Tworzy po³¹czenie (synapsê) pomiêdzy dwoma neuronami
-         * @param sourceLayer   numer warstwy, z której wychodzi po³¹czenie
-         * @param sourceNeuron  numer neuronu, z którego wychodzi po³¹czenie
-         * @param destLayer     numer warstwy docelowej po³¹czenia
+         * Tworzy poï¿½ï¿½czenie (synapsï¿½) pomiï¿½dzy dwoma neuronami
+         * @param sourceLayer   numer warstwy, z ktï¿½rej wychodzi poï¿½ï¿½czenie
+         * @param sourceNeuron  numer neuronu, z ktï¿½rego wychodzi poï¿½ï¿½czenie
+         * @param destLayer     numer warstwy docelowej poï¿½ï¿½czenia
          * @param destNeuron    numer neuronu docelowego
          */
 	public void connect(int sourceLayer,int sourceNeuron,
@@ -72,16 +72,21 @@ public class NeuralNet {
          */
         public void calculateError(int [] desAns) {
             Layer layer = getLayer(layers.size()-1);
-            size += desAns.length;  //liczba przetworzonych wzorcow
+            size += 1;  //liczba przetworzonych wzorcow
           // size = 1;
-             double error;
+            double newError = 0;
+            double error;
             for (int i=0;i<layer.size();i++) {
                 error = desAns[i]-layer.getNeuron(i).getValue();
-            //    System.out.println(error);
-                globalError += error*error;
-              //  System.out.println("size"+size);
+                newError += error*error;
+               
+               
+               // System.out.println("global"+globalError);
 
             }
+             
+             globalError += newError/10;
+
         }
 
         /**
