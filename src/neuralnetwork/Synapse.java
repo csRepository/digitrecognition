@@ -11,8 +11,10 @@ public class Synapse {
 
     private double value;
     private double delta; //rprop and backprop weight change
+    private double prevDelta;
     private double gradient ;  //weight gradient
-    private double weightChange;
+    private double prevGradient;
+    private double updateValue;    //RProp
     private Neuron fromNeuron;
     private Neuron toNeuron;
     private Random random = new Random();
@@ -22,7 +24,7 @@ public class Synapse {
             toNeuron = t;
             t.getIncomingSyn().add(this);
             f.getOutgoingSyn().add(this);
-            value = random.nextDouble()*2*0.2-0.2;
+            value = random.nextDouble()*2*0.1-0.1;
     }
 
     /**
@@ -53,6 +55,14 @@ public class Synapse {
         this.delta = delta;
     }
 
+    public double getPrevDelta() {
+        return prevDelta;
+    }
+
+    public void setPrevDelta(double prevDelta) {
+        this.prevDelta = prevDelta;
+    }
+
     /**
      * @return the value
      */
@@ -81,17 +91,25 @@ public class Synapse {
         this.gradient = gradient;
     }
 
+    public double getPrevGradient() {
+        return prevGradient;
+    }
+
+    public void setPrevGradient(double prevGradient) {
+        this.prevGradient = prevGradient;
+    }
+
     /**
      * @return the weightChange
      */
-    public double getWeightChange() {
-        return weightChange;
+    public double getUpdateValue() {
+        return updateValue;
     }
 
     /**
      * @param weightChange the weightChange to set
      */
-    public void setWeightChange(double weightChange) {
-        this.weightChange = weightChange;
+    public void setUpdateValue(double updateValue) {
+        this.updateValue = updateValue;
     }
 }

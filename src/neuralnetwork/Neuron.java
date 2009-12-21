@@ -11,7 +11,7 @@ public class Neuron {
 	private double value;				//wartosc neuronu
         private double delta;	
 	private ArrayList<Synapse> incomingSyn;
-        private ArrayList<Synapse> outgoingSyn;            // lista zawieraj¹ca sysnapsy wychodz¹ce z neuronu
+        private ArrayList<Synapse> outgoingSyn;            // lista zawierajï¿½ca sysnapsy wychodzï¿½ce z neuronu
 
 	public Neuron() {
 		incomingSyn = new ArrayList<Synapse>();
@@ -19,7 +19,7 @@ public class Neuron {
 	}
 
         /**
-         * Wyliczenie waroœci wyjœcia neuronu po zastosowaniu funkcji aktywacji
+         * Wyliczenie wartosci wyjscia neuronu po zastosowaniu funkcji aktywacji
          */
 	public void computeOutput()
 	  {
@@ -27,10 +27,22 @@ public class Neuron {
 	    for (int i=0; i< getIncomingSyn().size(); i++) {
 	    	sum += getIncomingSyn().get(i).getValue() * getIncomingSyn().get(i).getFromNeuron().getValue();
 	    }
-	  this.setValue(1.0 / (1.0 + Math.exp(-sum))); // sigmoid function
+	  this.setValue(sigm(sum)); // sigmoid function
+          
 	  }
 
+        public double tanh (double u)
+        {
+            double a = Math.exp( u );
+            double b = Math.exp( -u );
+            return ((a-b)/(a+b));
+        }
 
+        public double sigm (double u)
+        {
+            double a = Math.exp( -u );
+            return 1.0/(1.0 + a);
+        }
     /**
      * @return the inlinks
      */
