@@ -3,10 +3,14 @@
  * and open the template in the editor.
  */
 
-package neuralnetwork;
+package propagation;
+
+import neuralnetwork.Neuron;
+import neuralnetwork.Synapse;
 
 /**
- *
+ * QuickPropagation class that implements quick-propagation algorithm
+ * inherits from Propagation class
  * @author tm
  */
 public class QuickPropagation extends Propagation {
@@ -38,8 +42,8 @@ public class QuickPropagation extends Propagation {
 
     public double calculateDelta(Neuron neuron,Synapse syn) {
                 double weightChange = 0.0;
-                double error = syn.getGradient();
-                double previousError = syn.getPrevGradient();
+                double error = -syn.getGradient();
+                double previousError = -syn.getPrevGradient();
                 double previousWeightChange = syn.getDelta();
                 double shrinkFactor = (maxGrowthFactor / (1.0 + maxGrowthFactor));
 

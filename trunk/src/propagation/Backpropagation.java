@@ -1,8 +1,13 @@
-package neuralnetwork;
+package propagation;
+
+import neuralnetwork.Neuron;
+import neuralnetwork.Synapse;
 
 
 /**
- *
+ * BackPropagation class that implements back-propagation algorithm based on
+ * <p>Rumelhart, D.E., Hinton, G.E., Williams, R.J. (1986) "Learning internal
+ * representations by error propagation."</p>
  * @author tm
  */
 public class Backpropagation extends Propagation{
@@ -11,8 +16,8 @@ public class Backpropagation extends Propagation{
         private String method;
 
         public Backpropagation(String method, double[] parameters) {
-            this.momentum = parameters[0];
-            this.learningRate = parameters[1];
+            this.momentum = parameters[1];
+            this.learningRate = parameters[0];
             this.method = method;
         }
 
@@ -20,8 +25,7 @@ public class Backpropagation extends Propagation{
         public void changeWeights(Neuron neuron) {
             for (int i=0;i<neuron.getIncomingSyn().size();i++) {
                 Synapse syn = neuron.getIncomingSyn().get(i);
-                //syn.setDelta(learningRate*getPartDeriv(neuron,syn) + momentum*syn.getDelta());
-                syn.setDelta(syn.getGradient()*learningRate+momentum*syn.getDelta());
+                syn.setDelta(-learningRate * syn.getGradient() + momentum * syn.getDelta());
                 syn.setValue(syn.getValue()+syn.getDelta());
                 
             }
@@ -31,16 +35,12 @@ public class Backpropagation extends Propagation{
                for (int i=0;i<neuron.getIncomingSyn().size();i++) {
                 Synapse syn = neuron.getIncomingSyn().get(i);
                 syn.setGradient(syn.getGradient()+getActualGradient(neuron,syn));
-              //  syn.setDelta(syn.getDelta()+syn.getGradient()*learningRate+momentum*syn.getDelta());
-             //   System.out.println("syn"+i+" "+syn.getDelta());
             }
         }
         private static void ocalcUpdate(Neuron neuron) {
                for (int i=0;i<neuron.getIncomingSyn().size();i++) {
                 Synapse syn = neuron.getIncomingSyn().get(i);
                 syn.setGradient(getActualGradient(neuron,syn));
-               // syn.setDelta(syn.getGradient()*learningRate+momentum*syn.getDelta());
-              //  System.out.println("syn"+i+" "+syn.getDelta());
                }
         }
 
@@ -70,7 +70,5 @@ public class Backpropagation extends Propagation{
     public void initialize(Neuron neuron) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
-    
 
 }

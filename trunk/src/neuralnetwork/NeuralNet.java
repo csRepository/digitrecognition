@@ -1,20 +1,28 @@
 package neuralnetwork;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
- * Klasa implementuj�ca sie� neuronow�.
+ * Class that implements the neural network.
  * @author tm
  */
 public class NeuralNet {
 	
-	private ArrayList layers;
+	private ArrayList<Layer> layers;
         private double globalError;
         private double size;    //wielkosc zbioru wzorcow
 
-        public NeuralNet() {
+        public NeuralNet(int[] layersSizes) {
 		layers = new ArrayList();
+                for (int i = 0; i < layersSizes.length; i++) {
+                    layers.add(new Layer(layersSizes[i]));
+            }
 	}
+
+        public NeuralNet() {
+            layers = new ArrayList();
+        }
 
 	/**
 	 * Metoda dodaj�ca warstw� do struktury sieci
@@ -39,12 +47,27 @@ public class NeuralNet {
          * @param destLayer     numer warstwy docelowej po��czenia
          * @param destNeuron    numer neuronu docelowego
          */
-	public void connect(int sourceLayer,int sourceNeuron,
+	private void connect(int sourceLayer,int sourceNeuron,
 		      int destLayer,int destNeuron)
 	{
-		new Synapse(getLayer(sourceLayer).getNeuron(sourceNeuron),
+		new Synapse(this.getLayer(sourceLayer).getNeuron(sourceNeuron),
               getLayer(destLayer).getNeuron(destNeuron));
 	}
+
+             /**
+     * Tworzy połączenie pomiędzy wszystkimi neuronami dwóch warstw
+     * (łączy warstwy ze sobą)
+     * @param n             liczba neuronow war. 1
+     * @param n1            liczba neuronow war. 2
+     * @param sourceLayer   nazwa warstwy zrodlwoej
+     * @param destLayer     nazwa warstwy docelowej
+     */
+
+    public void connectLayers(int n, int n1,int sourceLayer, int destLayer) {
+        for (int i=0;i<n;i++)
+            for (int j=0;j<n1;j++)
+                connect(sourceLayer, i, destLayer, j);      //polaczenie neuronow
+    }
 
         /**
          * Obliczenie wyjsc neuronow poczynajac od warstwy wejsciowej w
@@ -90,7 +113,7 @@ public class NeuralNet {
         }
 
         /**
-         * Obliczenie bledu sredniokwadratowego (root mean square)
+         * Calculate Root Mean Square (RMS)
          * @return zwraca blad rms
          */
         public double calculateRMS() {
@@ -100,4 +123,26 @@ public class NeuralNet {
             return errorRMS;
         }
 
+        public void initializeWeights(int inCount, int hidCount) {
+                //set range
+                Random r = new Random();
+                double rH = 1/Math.sqrt( (double)inCount);
+                double rO = 1/Math.sqrt( (double)hidCount);
+
+                //set weights between input and hidden
+                //--------------------------------------------------------------------------------------------------------
+                for(int i = 0; i < layers.size()-1; i++) {
+                    Layer layer = layers.get(i);
+                    for (int j = 0; j < layer.size(); j++) {
+                        Neuron neuron = layer.getNeuron(j);
+                        ArrayList<Synapse> synapses = neuron.getOutgoingSyn();
+                        for (int k = 0; k < synapses.size(); k++) {
+                            if (i==0)
+                                synapses.get(k).setValue(( ( (double)(r.nextInt()%100)+1)/100  * 2 * rH ) - rH);
+                            else
+                                synapses.get(k).setValue(( ( (double)(r.nextInt()%100)+1)/100  * 2 * rO ) - rO);
+                        }
+                    }
+                }
+        }
 }

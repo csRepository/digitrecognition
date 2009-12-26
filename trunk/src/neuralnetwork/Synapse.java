@@ -3,8 +3,7 @@ package neuralnetwork;
 import java.util.Random;
 
 /**
- * Klasa uzywana w celu stworzenia synapsy - polaczenia pomiedzy
- * dwoma neuronami sasiednich warstw
+ * Makes a connection between two neighbours layers.
  * @author tm
  */
 public class Synapse {
@@ -15,16 +14,18 @@ public class Synapse {
     private double gradient ;  //weight gradient
     private double prevGradient;
     private double updateValue;    //RProp
+    private double learningRate;    //Delta-bar-delta
     private Neuron fromNeuron;
     private Neuron toNeuron;
     private Random random = new Random();
 
     public Synapse(Neuron f, Neuron t) {
-            fromNeuron = f;
-            toNeuron = t;
-            t.getIncomingSyn().add(this);
-            f.getOutgoingSyn().add(this);
-            value = random.nextDouble()*2*0.1-0.1;
+        fromNeuron = f;
+        toNeuron = t;
+        t.getIncomingSyn().add(this);
+        f.getOutgoingSyn().add(this);
+        value = random.nextDouble() * 2 * 0.25 - 0.25;
+        learningRate = 0.005;
     }
 
     /**
@@ -42,14 +43,14 @@ public class Synapse {
     }
 
     /**
-     * @return the data
+     * @return the delta
      */
     public double getDelta() {
         return delta;
     }
 
     /**
-     * @param data the data to set
+     * @param delta the delta to set
      */
     public void setDelta(double delta) {
         this.delta = delta;
@@ -85,7 +86,7 @@ public class Synapse {
     }
 
     /**
-     * @param partDerivative the partDerivative to set
+     * @param gradient the gradient to set
      */
     public void setGradient(double gradient) {
         this.gradient = gradient;
@@ -107,9 +108,18 @@ public class Synapse {
     }
 
     /**
-     * @param weightChange the weightChange to set
+     * @param updateValue the updateValue to set
      */
     public void setUpdateValue(double updateValue) {
         this.updateValue = updateValue;
     }
+
+    public double getLearningRate() {
+        return learningRate;
+    }
+
+    public void setLearningRate(double learningRate) {
+        this.learningRate = learningRate;
+    }
+    
 }
