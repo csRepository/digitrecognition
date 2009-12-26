@@ -3,8 +3,8 @@ package neuralnetwork;
 import java.util.ArrayList;
 
 /**
- * Klasa implementuj¹ca warstwê sieci neuronowej. Ka¿da warstwa zawiera
- * listê neuronów.
+ * Implements the Neural Network layer. Each layer contains
+ * a list of the neurons.
  * @author tm
  */
 public class Layer extends ArrayList {
@@ -19,7 +19,7 @@ public class Layer extends ArrayList {
                 }
 	}
 	/**
-         * Zwraca referencjê do obiektu Neuron
+         * Zwraca referencje do obiektu Neuron
          * @param n numer neuronu
          * @return Neuron
          */

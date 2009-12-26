@@ -13,8 +13,8 @@ public class MNISTtoPPM extends Object {
       System.exit(0);
     } else {
       try {
-	imgF = new MNISTImageFile(data.trainImgFPath,"r");
-	lblF = new MNISTLabelFile(data.trainLblFPath,"r");
+	imgF = new MNISTImageFile(data.testImgFPath,"r");
+	lblF = new MNISTLabelFile(data.testLblFPath,"r");
       } catch (FileNotFoundException e) { 
 	System.err.println("File not found: " + e);
 	System.exit(0);

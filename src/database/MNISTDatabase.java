@@ -2,7 +2,10 @@ package database;
 
 import java.io.*;
 
-
+/**
+ * Class with methods for handling reading images/labels from MNIST data files.
+ * @author tm
+ */
 public class MNISTDatabase  {
 
     private static MNISTImageFile trainImgF,testImgF;
@@ -11,7 +14,7 @@ public class MNISTDatabase  {
     public String trainLblFPath = "digitDatabase/train-labels-idx1-ubyte";
     public String testImgFPath = "digitDatabase/t10k-images-idx3-ubyte";
     public String testLblFPath = "digitDatabase/t10k-labels-idx1-ubyte";
-
+  
   public MNISTDatabase() {  
       try {
 	trainImgF = new MNISTImageFile(trainImgFPath,"r");
@@ -26,7 +29,7 @@ public class MNISTDatabase  {
 	System.exit(0);
       }
     }
-          public int[][] readImage(String kind,int nr) {
+         public int[][] readImage(String kind,int nr) {
             MNISTImageFile imgFile;
             if (kind.equals("train"))
                 imgFile = trainImgF;

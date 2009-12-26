@@ -3,7 +3,7 @@ package neuralnetwork;
 import java.util.ArrayList;
 
 /**
- * Neuron: Implementacja neuronu w sieci neuronowej
+ * Neuron: Implementation of a neuron in the Neural Network.
  * @author tm
  */
 public class Neuron {
@@ -40,9 +40,17 @@ public class Neuron {
 
         public double sigm (double u)
         {
-            double a = Math.exp( -u );
-            return 1.0/(1.0 + a);
+            return 1.0 / (1 + Math.exp(-1.0 * u));
         }
+
+        public double sigmDerivative(double d) {
+            return d * (1.0 - d) ;
+	}
+
+        public double tanhDerivative(double d) {
+            return  (1 + d) * (1 - d);
+	}
+
     /**
      * @return the inlinks
      */

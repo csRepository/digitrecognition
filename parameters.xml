@@ -1,26 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-    Document   : newXMLDocument.xml
-    Created on : 7 grudzień 2009, 09:40
-    Author     : tm
-    Description:
-        Purpose of the document follows.
--->
-
 <network>
-    <structure>
-        <hidden>25</hidden> <!-- nie uwzgledniajac neuronu bias-->
-    </structure>
+    <parameters>
+        <hidden>25</hidden>      <!-- liczba neuronow ukrytch nie uwzgledniajac neuronu bias -->
+        <patterns>
+            <train>300</train>    <!--  liczba wzorcow trenujacych -->
+            <test>10000</test>    <!--  liczba wzorcow testujacych -->
+        </patterns>
+        <error>0.03</error>       <!-- max. blad RMS jaki musi osiagnac siec - 0 jesli nie uwazgledniac-->
+        <epochs>30</epochs>       <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
+        <algorithm>bp</algorithm>  <!-- bp/rp/qp/dbd/ssab -->
+        <change_method>online</change_method> <!-- zmiana wag (online/batch) -->
+    </parameters>
     <algorithm>
-        <name>backprop</name>
+        <name>bp</name>         <!-- backpropagation -->
         <parameter attr="learning_rate">0.1</parameter>
         <parameter attr="momentum">0.9</parameter>
     </algorithm>
     <algorithm>
-         <name>rprop</name>
+         <name>rp</name>        <!--resilentpropagation-->
+         <parameter attr="deltamax">1.0</parameter>
+         <parameter attr="deltamin">0.000001</parameter>
+         <parameter attr="deltazero">0.05</parameter>
+         <parameter attr="decfactor">0.5</parameter>
+         <parameter attr="incfactor">1.2</parameter>
     </algorithm>
-     <algorithm>
-         <name>quickprop</name>
+     <algorithm>                <!--quickpropagation-->
+         <name>qp</name>
+         <parameter attr="learning_rate">0.01</parameter>
+         <parameter attr="momentum">0.9</parameter>
+         <parameter attr="mode_switch_treshold">0.0</parameter>
+         <parameter attr="max_growth_factor">1.75</parameter>
     </algorithm>
 </network>
