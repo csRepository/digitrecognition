@@ -1,17 +1,14 @@
 
-import propagation.ResilentPropagation;
-import propagation.Propagation;
-import propagation.QuickPropagation;
-import propagation.Backpropagation;
-import database.MNISTDatabase;
-import util.ParametersReader;
-import util.WeightsFileUtil;
-import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.ArrayList;
+import algorithm.*;
 import neuralnetwork.*;
-import propagation.DeltaBarDelta;
-import propagation.SuperSAB;
+import database.MNISTDatabase;
+import util.WeightsFileUtil;
 import util.NeuralUtil;
+import util.GPathReader;
+import java.lang.reflect.Constructor;
 
 /**
  * Main class to train the neural network.
@@ -29,20 +26,22 @@ public class Train {
     private static String method;           //określa sposob zmiany wag
     private static int [] desiredAns;       //oczekiwand odpowiedzi sieci
     private static Propagation alg;
-    private static String algorytm;         //rodzaj lagorytmu z pliku konfig.
-    private static ParametersReader parametersFile; //klasa wczytuajca parametery
+    private static String algorithm;         //rodzaj lagorytmu z pliku konfig.
+   // private static ParametersReader parametersFile; //klasa wczytuajca parametery
+    private static GPathReader read;
     private static double[][][] images;
     private static int[][] labels;
     private static ArrayList<Integer> patternsNr;
     private static int licz;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)  {
 
-        parametersFile = NeuralUtil.readConfigFile(args);
+        read = NeuralUtil.readConfigFile(args);
         dataMNIST = new MNISTDatabase();
-        
+
+       // read.getParameters(algorithm);
         nIn = 28*28+1; //wielkosc obrazu + bias
-        nHidd = parametersFile.getHiddNeuronsCount()+1;  //l. neuronow + bias
+        nHidd = read.getHiddNeuronsCount()+1;  //l. neuronow + bias
         nOut = 10;
         int net[] = {nIn,nHidd,nOut};
         neuralNetwork = new NeuralNet(net);                // tworzenie sieci neuronwej
@@ -51,66 +50,66 @@ public class Train {
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
 
         setBiases();
-
-        //polaczenie warstw 
+        
+        /*-------------- connect layers ----------------------------------*/
         neuralNetwork.connectLayers(nIn, nHidd-1,0,1);
         neuralNetwork.connectLayers(nHidd, nOut,1,2);
-        //rodzaj algorytmu
-
-        algorytm = parametersFile.getDefaultAlgorithm();
-        method = parametersFile.getUpdateMethod();
-        System.out.println("Rodzaj algorytmu: "+ algorytm);
-
-        if (algorytm.equals("bp")) {
-                alg = new Backpropagation(method,parametersFile.getParametersBP());
-        }
-        else if (algorytm.equals("rp")) {
-                alg = new ResilentPropagation(parametersFile.getParametersRP());
-        }
-        else if (algorytm.equals("qp")){
-                alg = new QuickPropagation(parametersFile.getParametersQP());
-        }
-        else if (algorytm.equals("dbd")){
-                alg = new DeltaBarDelta();
-        }
-        else if (algorytm.equals("ssab")){
-                alg = new SuperSAB();
-        }
-        else {
+        /* ------------- algorithm name ----------------------------------*/
+        algorithm = read.getDefaultAlgorithm();
+        /* --------------weights change method ---------------------------*/
+        method = read.getUpdateMethod();
+        
+        /* -------make object of algorithm class -------------------------*/
+        try {
+            Class c = Class.forName("propagation." + algorithm);
+            if (read.getParameters(algorithm) != null) {
+                Constructor constr = c.getConstructor(new Class[] {double[].class}); //constructor with parameters
+                alg = (Propagation) constr.newInstance(new Object[] {read.getParameters(algorithm)});
+            }
+            else {
+                Constructor constr = c.getConstructor(new Class[] {});  //constructor without parameters
+                alg = (Propagation) constr.newInstance(new Object[] {});
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(Train.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Błąd w pliku konfiguracyjnym." + "\n" +
-                                "Dostępne algorytmy: bp/rp/qp/dbd/ssab");
+                               "Dostępne algorytmy: Backpropagation/QuickPropagation/" +
+                               "ResilentPropagation/DeltaBarDelta/SuperSAB ");
             System.exit(1);
         }
-        
 
-        //inicjalizacja wartosci zmian wag na 0.1 - RPROP
-        if (algorytm.equals("rp")) {
+        //initialize updateValues to 0.1 for RPROP algorithm
+        if (algorithm.equals("ResilentPropagation")) {
             for (int i=1; i<neuralNetwork.getLayers().size();i++)
                 for (int j=0;j<neuralNetwork.getLayer(i).size();j++)
                     alg.initialize(neuralNetwork.getLayer(i).getNeuron(j));
         }
 
-       // neuralNetwork.initializeWeights(nIn, nHidd);
-        /*--------------------------------------------------------------------*/
-        System.out.println("Przetwarzanie obrazów...");
+        // neuralNetwork.initializeWeights(nIn, nHidd);
+        /*-----------------Images preprocess----------------------------------*/
+        System.out.println("Data set: " + read.getTrainDataSet());
+        System.out.println("Image count: " + read.getTrainPatternsCount());
+        System.out.println("Algorithm type: "+ algorithm);
+        System.out.println("------");
+        System.out.println("Process: Preprocessing images...");
         patternsNr = prepareData();
 
-        /*--------------------------------------------------------------------*/
-         System.out.println("Uczenie SN...");
+        /*-----------------Neural Networks learning---------------------------*/
+         System.out.println("Process: Neural Network learning...");
          long time_start = System.currentTimeMillis();
 
-         if ((parametersFile.getEpochsCount() != 0) && (parametersFile.getRMS() != 0))
+         if ((read.getEpochsCount() != 0) && (read.getRMS() != 0))
              do
                learn();
-             while ((rms >= parametersFile.getRMS()) && (licz < parametersFile.getEpochsCount()));
-         else if (parametersFile.getEpochsCount()!=0)
+             while ((rms >= read.getRMS()) && (licz < read.getEpochsCount()));
+         else if (read.getEpochsCount()!=0)
              do 
                learn();
-             while (licz < parametersFile.getEpochsCount());
-         else if (parametersFile.getRMS()!=0) {
+             while (licz < read.getEpochsCount());
+         else if (read.getRMS()!=0) {
              do 
                learn();
-             while (rms >= parametersFile.getRMS() );
+             while (rms >= read.getRMS() );
          }
 
           long time_end = System.currentTimeMillis();
@@ -120,28 +119,30 @@ public class Train {
           else System.out.println((double)time/60000+" min");
         /*--------------------------------------------------------------------*/
 
-          //zapis wag do pliku
-         WeightsFileUtil.writeWeights(neuralNetwork,algorytm);
-        
+          //write weights to file
+         String weightsFileName = read.getWeightsFileName();
+         WeightsFileUtil.writeWeights(neuralNetwork,"weights/" +  weightsFileName);
     }
-
-
 
     private  static ArrayList<Integer> prepareData() {
         ArrayList<Integer> trainArray = new ArrayList();
-        NeuralUtil.setPatterns(trainArray,parametersFile.getTrainPatternsCount(),60000); //wybor wzorcow z bazy wz. uczacych
-        images = NeuralUtil.prepareInputSet(trainArray,dataMNIST);
-        labels = NeuralUtil.prepareOutputSet(trainArray,nOut,dataMNIST);
+        NeuralUtil.setPatterns(trainArray,read.getTrainPatternsCount(),60000); //wybor wzorcow z bazy wz. uczacych
+        try {
+            images = NeuralUtil.prepareInputSet(trainArray, dataMNIST, read.getTrainDataSet(), read.getPreprocessMethod());
+        } catch (Exception ex) {
+            Logger.getLogger(Train.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        labels = NeuralUtil.prepareOutputSet(trainArray,nOut,dataMNIST, read.getTrainDataSet());
 
         patternsNr = new ArrayList();
-        for (int i = 0; i < parametersFile.getTrainPatternsCount(); i++) {
+        for (int i = 0; i < read.getTrainPatternsCount(); i++) {
             patternsNr.add(i);
         }
         return patternsNr;
     }
 
     /*
-     * Ustawia wartosc neuronow typu bias
+     * Set values of bias neurons.
      */
     private static void setBiases() {
          for (int i = 0; i < neuralNetwork.getLayers().size()-1; i++) {
@@ -173,10 +174,13 @@ public class Train {
                  //wylicznie bledow wyjsc
                  neuralNetwork.calculateError(desiredAns);
                  //propagacja bledow wstecz
+
                  backPropagate();
 
-                 if (method.equals("online")) 
+                 if (method.equals("online")) {
                     changeWeights();
+                    resetGradients();
+                 }
              }
                 lastError = rms;
                 rms = neuralNetwork.calculateRMS();
@@ -188,7 +192,7 @@ public class Train {
              }
     }
     /**
-     * Propagacja bledu wstecz
+     * Propagate error backwards.
      */
     private static void backPropagate() {
           for(int i = neuralNetwork.getLayers().size()-1; i > 0; i--) {
@@ -205,7 +209,7 @@ public class Train {
          }
     }
     /**
-     * Zmiana wartosci wag zgodnie z regula uczenia wybranego algorytmu
+     * Change weights with selected algorithm rule.
      */
     private static void changeWeights() {
         for(int i = neuralNetwork.getLayers().size()-1; i > 0; i--) {
@@ -215,7 +219,7 @@ public class Train {
          }
     }
     /**
-     * Reset gradientow kazdej synapsy
+     * Reset gradients for all synapses.
      */
     private static void resetGradients() {
         for(int i = neuralNetwork.getLayers().size()-1; i > 0; i--) {

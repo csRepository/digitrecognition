@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import neuralnetwork.NeuralNet;
 import neuralnetwork.Neuron;
 
@@ -19,18 +21,18 @@ import neuralnetwork.Neuron;
 public class WeightsFileUtil {
 
     public static double[] readWeights(NeuralNet net, String fileName) throws IOException {
-        WeightsFileReader wFiler = null;
+        WeightsFileReader wFile = null;
         int nIn = net.getLayer(0).size();
         int nHidd = net.getLayer(1).size();
         int nOut = net.getLayer(2).size();
-        int weightsCount = nIn*(nHidd-1)+nHidd*nOut;
+        int weightsCount = nIn * (nHidd - 1) + nHidd * nOut;
         double dataread[] = null;
 
         try {
-            wFiler = new WeightsFileReader(fileName);
-                dataread = new double[wFiler.getCount()];
+            wFile = new WeightsFileReader(fileName);
+                dataread = new double[wFile.getCount()];
                 if (dataread.length == weightsCount)
-                    dataread = wFiler.readData(dataread.length);
+                    dataread = wFile.readData(dataread.length);
                 else {
                     System.out.println("Plik wag nie zgadza się z architekturą sieci.");
                     System.exit(0);
@@ -39,22 +41,22 @@ public class WeightsFileUtil {
             System.err.println("Blad I/O pliku: " + ex);
         }
         finally {
-            wFiler.close();
+            wFile.close();
         }
         return dataread;
     }
 
-    public static void writeWeights(NeuralNet net, String algorithm) throws IOException {
+    public static void writeWeights(NeuralNet net, String fileName) {
          int w = -1;
          WeightsFileWriter wFile = null;
          int nIn = net.getLayer(0).size();
          int nHidd = net.getLayer(1).size();
          int nOut = net.getLayer(2).size();
+         int weightsCount = nIn * (nHidd - 1) + nHidd * nOut;
          try {
 
-             double data[] = new double[nIn*(nHidd-1)+nHidd*nOut];
-             wFile = new WeightsFileWriter("weights/"+ algorithm + "_" + (nIn-1) + "x" + (nHidd-1)
-                     + "x" + nOut + "_" + getDateTime() + ".dat", data.length);
+             double data[] = new double[weightsCount];
+             wFile = new WeightsFileWriter(fileName, weightsCount);
              for (int i=1; i<net.getLayers().size();i++) {
                     for (int j=0;j<net.getLayer(i).size();j++) {
                         Neuron neuron = net.getLayer(i).getNeuron(j);
@@ -66,7 +68,11 @@ public class WeightsFileUtil {
         } catch (IOException ex) {
             System.err.println("Blad I/O pliku: " + ex);
         } finally {
-           wFile.close();
+            try {
+                wFile.close();
+            } catch (IOException ex) {
+                Logger.getLogger(WeightsFileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

@@ -7,6 +7,8 @@ package util;
 
 import database.MNISTDatabase;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,30 +21,37 @@ public class NeuralUtil {
     /*
      * Wczytuje plik konfiguracyjny z parametrami sieci
      */
-    public static ParametersReader readConfigFile(String[] args) {
-        ParametersReader parameters;
+    public static GPathReader readConfigFile(String[] args) {
+         GPathReader read;
                 if (args.length > 0) {
                 File file = new File(args[0]);
                 if (!file.exists()) {
                      System.err.println("Brak pliku konfiguracyjnego");
                      System.exit(1);
                 } else
-                  return  parameters = new ParametersReader(args[0]);
+                  return  read = new GPathReader(args[0]);
         }
         else {
-                System.err.println("Brak parametru z plikiem konfiguracyjnym");
+                System.err.println("Brak parametru z plikiem konfiguracyjnym" +
+                                    "np. java Train \"parameters.xml\" ");
                 System.exit(1);
         }
         return null;
     }
 
-    /*
-     * Przygotowuej tablice wszystkich wejsc (tablica [nr][tablica_obrazu[28][28]])
+    /**
+     * Prepare array for all inputs (3-dimesional array: [nr][array[28][28]])
+     * @param array
+     * @param data
+     * @param method    data preprocess method (Method must be defined in NeuralUtil class)
+     * @return
      */
-    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data) {
+    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data, String dataType, String methodName) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         double[][][] tab = new double[array.size()][][];
         for (int i = 0; i < array.size(); i++) {
-            tab[i] = scale(getImage(array.get(i),data));
+            Object[] methodParam =  new Object[] {getImage(array.get(i), data, dataType)};
+            Method method = NeuralUtil.class.getDeclaredMethod(methodName,new Class[] {int[][].class});
+            tab[i] = (double[][]) method.invoke(NeuralUtil.class, methodParam);
         }
         return tab;
     }
@@ -50,13 +59,13 @@ public class NeuralUtil {
     /*
      * Przygotowuej tablice wszystkich wyjsc (tablica [nr][tablica_wyjsc[10])
      */
-    public static int[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data) {
+    public static int[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
         int tab[][] = new int[array.size()][10];
         for (int i = 0; i < array.size(); i++) {
             int d[] = new int[outSize];
             for (int j = 0; j < outSize; j++)
                 d[j] = 0;
-            d[ getLabel(array.get(i), data) ] = 1;
+            d[ getLabel(array.get(i), data, dataType) ] = 1;
             tab[i] = d;
         }
         return tab;
@@ -91,16 +100,16 @@ public class NeuralUtil {
         return array;
     }
 
-    private static int getLabel(int digit, MNISTDatabase data) {
-        return data.readLabel("train", digit);
+    private static int getLabel(int digit, MNISTDatabase data, String dataType) {
+        return data.readLabel(dataType, digit);
     }
 
-    private static int[][] getImage(int digit, MNISTDatabase data) {
-        return data.readImage("train", digit);
+    private static int[][] getImage(int digit, MNISTDatabase data, String dataType) {
+        return data.readImage(dataType, digit);
     }
 
     /*
-     * Bianryzacja danych
+     * Binaryzacja danych
      */
     private static double[][] binarize(int[][] data) {
         int suma = 0;
@@ -128,7 +137,7 @@ public class NeuralUtil {
         double data1[][] = new double[data.length][data.length];
         for (int j = 0; j < data.length; j++) {
             for (int k = 0; k < data.length; k++) {
-               data1[j][k] = normalize(data[j][k], 255, 0, 1, -1);
+               data1[j][k] = normalize(data[j][k], 255, 0, 1, 0);
             }
         }
         return data1;

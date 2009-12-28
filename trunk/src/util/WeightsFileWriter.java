@@ -13,14 +13,14 @@ public class WeightsFileWriter extends DataOutputStream {
 
     String fileName;
 
-    public WeightsFileWriter(String filename, int count) throws IOException {
+    public WeightsFileWriter(String filename, int networkSize) throws IOException {
         super(new BufferedOutputStream(
                   new FileOutputStream(filename)
               )
         );
 
             writeInt(2222);
-            writeInt(count);
+            writeInt(networkSize);
     }
 
     public void writeData(double data[]) {
