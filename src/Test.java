@@ -1,6 +1,7 @@
 
 import database.MNISTDatabase;
-import util.ParametersReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import util.WeightsFileUtil;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +12,7 @@ import neuralnetwork.Layer;
 import neuralnetwork.NeuralNet;
 import neuralnetwork.Neuron;
 import util.NeuralUtil;
+import util.GPathReader;
 
 /**
  * Main class to test the neural network.
@@ -27,18 +29,16 @@ public class Test {
     private static int[][] labels;
     private static ArrayList<Integer> patternsNr;
     private static int [] desiredAns;       //oczekiwane odpowiedzi sieci
-    private static ParametersReader parametersFile;
+    //private static ParametersReader parametersFile;
+    private static GPathReader read;
 
     public static void main(String[] args) throws IOException {
 
-        String fileName;
-        if ((fileName = chooseFile())==null) {
-            System.out.println("Brak plików  w katalogu 'weights' ");
-            System.exit(0);
-        }
+        //read = NeuralUtil.readConfigFile(args);
+        read = new GPathReader(args[0]);
 
         nIn = 28*28+1; //wielkosc obrazu + bias
-        nHidd = parametersFile.getHiddNeuronsCount()+1;  //l. neuronow + bias
+        nHidd = read.getHiddNeuronsCount()+1;  //l. neuronow + bias
         nOut = 10;
         int net[] = {nIn,nHidd,nOut};
         neuralNetwork = new NeuralNet(net);                // tworzenie sieci neuronwej
@@ -52,9 +52,10 @@ public class Test {
         neuralNetwork.connectLayers(nHidd, nOut,1,2);
         //create database object
         dataMNIST = new MNISTDatabase();
-        // wczytanie wag
-        //-------------------------------------------------------------------------------------
-        double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,"weights/" + fileName);
+       
+       /*-----------------read weights----------------------------------------*/
+        String weightsFileName = read.getWeightsFileName();
+        double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,"weights/" + weightsFileName);
          int w =- 1;
          for (int i=1; i<neuralNetwork.getLayers().size();i++) {
                 for (int j=0;j<neuralNetwork.getLayer(i).size();j++) {
@@ -64,11 +65,11 @@ public class Test {
                 }
          }
 
-        /*--------------------------------------------------------------------*/
-        System.out.println("Przetwarzanie obrazów...");
+        /*-----------------Images preprocess----------------------------------*/
+        System.out.println("Process: Preprocessing images...");
         patternsNr = prepareData();
-        /*--------------------------------------------------------------------*/
-        System.out.println("Rozpoznawanie obrazów...");
+        /*-----------------Digit recogntion----------------------------------*/
+        System.out.println("Process: Patterns recognition...");
         // wczytanie obrazow
         patternsNr = prepareData();
         double max[] = new double[2];
@@ -106,18 +107,18 @@ public class Test {
                      if (desiredAns[j] == 1)  digit = j;
                  }
                  ++badRecognizedCount;
-                 System.out.println(badRecognizedCount + ": Digit: " + digit + " Recognized: " +
-                    + (int)max[0] + " value: " + max[1] + " patternNr:" + patternsNr.get(i) );
+//                 System.out.println(badRecognizedCount + ": Digit: " + digit + " Recognized: " +
+//                    + (int)max[0] + " value: " + max[1] + " patternNr:" + patternsNr.get(i) );
             }
             max[1] = 0;
             pom = 0;
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci
-        double accuracy = roundToDecimals(100-(double)badRecognizedCount/(double)parametersFile.getTestPatternsCount()*100,2);
+        double accuracy = roundToDecimals(100-(double)badRecognizedCount/(double)read.getTestPatternsCount()*100,2);
         System.out.println("----");
         System.out.println("Bad recognized images: " + badRecognizedCount
-                + "/" + parametersFile.getTestPatternsCount() + " accuracy: "
+                + "/" + read.getTestPatternsCount() + " accuracy: "
                 + accuracy + "%");
 
     }
@@ -148,9 +149,13 @@ public class Test {
 
     private  static ArrayList<Integer> prepareData() {
         ArrayList<Integer> testArray = new ArrayList();
-        NeuralUtil.setPatterns(testArray,parametersFile.getTestPatternsCount(),10000); //wybor wzorcow z bazy wz. uczacych
-        images = NeuralUtil.prepareInputSet(testArray,dataMNIST);
-        labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST);
+        NeuralUtil.setPatterns(testArray,read.getTestPatternsCount(),10000); //wybor wzorcow z bazy wz. uczacych
+        try {
+            images = NeuralUtil.prepareInputSet(testArray, dataMNIST, read.getTestDataSet(), read.getPreprocessMethod());
+        } catch (Exception ex) {
+            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, read.getTestDataSet());
 
         return testArray ;
     }

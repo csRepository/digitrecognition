@@ -30,13 +30,17 @@ public class MNISTDatabase  {
       }
     }
          public int[][] readImage(String kind,int nr) {
-            MNISTImageFile imgFile;
+            MNISTImageFile imgFile = null;
             if (kind.equals("train"))
                 imgFile = trainImgF;
-             else
+             else if (kind.equals("test"))
                 imgFile = testImgF;
-                imgFile.setCurr(nr);      //obraz
-                return imgFile.readData();
+             else {
+                 System.out.println("Brak zbioru " + "'" + kind + "'" + " w bazie");
+                 System.exit(1);
+             }
+            imgFile.setCurr(nr);      //obraz
+            return imgFile.readData();
         }
          public int readLabel(String kind,int nr) {
             MNISTLabelFile lblFile;

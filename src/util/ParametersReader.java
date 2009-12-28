@@ -44,6 +44,10 @@ public class ParametersReader {
         return count;
     }
 
+    public String getPreprocessMethod() {
+        String expression = "/network/parameters/patterns/preprocess/text()";
+        return (String) reader.read(expression,XPathConstants.STRING);
+    }
     public double getRMS() {
         String expression = "/network/parameters/error/text()";
         double rms = (Double) reader.read(expression,XPathConstants.NUMBER);
@@ -62,37 +66,17 @@ public class ParametersReader {
         return method;
     }
 
-    public double[] getParametersRP() {
-        double[] parameters = new double[5];
-        String expression = "/network/algorithm[name='rp']/parameter/text()";
+    public double[] getParameters(String algorithm) {
+        String expression = "/network/algorithm[name='" + algorithm + "']/parameter/text()";
         NodeList node = (NodeList) reader.read(expression,XPathConstants.NODESET);
-        for (int i = 0; i < node.getLength(); i++) {
-            double d = Double.valueOf(node.item(i).getNodeValue());
-            parameters[i] = d;
+        if (node.getLength()!=0) {
+            double[] parameters = new double[node.getLength()];
+            for (int i = 0; i < node.getLength(); i++) {
+                double d = Double.valueOf(node.item(i).getNodeValue());
+                parameters[i] = d;
+            }
+            return parameters;
         }
-        return parameters;
+        return null;
     }
-
-    public double[] getParametersBP() {
-        double[] parameters = new double[2];
-        String expression = "/network/algorithm[name='bp']/parameter/text()";
-        NodeList node = (NodeList) reader.read(expression,XPathConstants.NODESET);
-        for (int i = 0; i < node.getLength(); i++) {
-            double d = Double.valueOf(node.item(i).getNodeValue());
-            parameters[i] = d;
-        }
-        return parameters;
-    }
-
-    public double[] getParametersQP() {
-        double[] parameters = new double[4];
-        String expression = "/network/algorithm[name='qp']/parameter/text()";
-        NodeList node = (NodeList) reader.read(expression,XPathConstants.NODESET);
-        for (int i = 0; i < node.getLength(); i++) {
-            double d = Double.valueOf(node.item(i).getNodeValue());
-            parameters[i] = d;
-        }
-        return parameters;
-    }
-
 }
