@@ -16,7 +16,7 @@ import javax.xml.xpath.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-public class XPathReader {
+public final class XPathReader {
 
     private String xmlFile;
     private Document xmlDocument;

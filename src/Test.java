@@ -1,4 +1,3 @@
-
 import database.MNISTDatabase;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import neuralnetwork.Layer;
 import neuralnetwork.NeuralNet;
 import neuralnetwork.Neuron;
+import neuralnetwork.Synapse;
 import util.NeuralUtil;
 import util.GPathReader;
 
@@ -26,9 +26,9 @@ public class Test {
     private static NeuralNet neuralNetwork;
     private static MNISTDatabase dataMNIST;
     private static double[][][] images;
-    private static int[][] labels;
+    private static double[][] labels;
     private static ArrayList<Integer> patternsNr;
-    private static int [] desiredAns;       //oczekiwane odpowiedzi sieci
+    private static double [] desiredAns;       //oczekiwane odpowiedzi sieci
     //private static ParametersReader parametersFile;
     private static GPathReader read;
 
@@ -55,23 +55,36 @@ public class Test {
        
        /*-----------------read weights----------------------------------------*/
         String weightsFileName = read.getWeightsFileName();
-        double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,"weights/" + weightsFileName);
+        double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,weightsFileName);
          int w =- 1;
-         for (int i=1; i<neuralNetwork.getLayers().size();i++) {
-                for (int j=0;j<neuralNetwork.getLayer(i).size();j++) {
-                    Neuron neuron = neuralNetwork.getLayer(i).getNeuron(j);
-                    for (int k=0;k<neuron.getIncomingSyn().size();k++)
-                       neuron.getIncomingSyn().get(k).setValue(weightsArray[++w]);
+         int layersSize = neuralNetwork.getLayers().size();
+
+         for (int i=1; i < layersSize;i++) {
+                Layer layer = neuralNetwork.getLayer(i);
+                for (int j=0;j < layer.size();j++) {
+                    Neuron neuron = layer.getNeuron(j);
+                    ArrayList<Synapse> incSyns = neuron.getIncomingSyn();
+                    for (int k = 0; k < incSyns.size(); k++)
+                       incSyns.get(k).setValue(weightsArray[++w]);
                 }
          }
-
-        /*-----------------Images preprocess----------------------------------*/
+        String algorithm = read.getDefaultAlgorithm();
+        double[] algParam = read.getParameters(algorithm);
+        System.out.println("Data set: " + read.getTestDataSet());
+        System.out.println("Image count: " + read.getTestPatternsCount());
+        System.out.println("Hidden neurons count: " + read.getHiddNeuronsCount());
+        System.out.print("Algorithm type: "+ algorithm + " [");
+        for (int i = 0; i < read.getParameters(algorithm).length; i++) {
+            System.out.print(" " + algParam[i]);
+        }
+        double decay = read.getWeightsDecay();
+        System.out.println(", decay:" + decay + "]\n------");
+       /*-----------------Images preprocess----------------------------------*/
         System.out.println("Process: Preprocessing images...");
         patternsNr = prepareData();
         /*-----------------Digit recogntion----------------------------------*/
         System.out.println("Process: Patterns recognition...");
         // wczytanie obrazow
-        patternsNr = prepareData();
         double max[] = new double[2];
         double pom = 0;
         int badRecognizedCount = 0;
@@ -79,8 +92,9 @@ public class Test {
         for (int i=0;i<patternsNr.size();i++) {
             //Ustawienie wzorca
             int index = 0;
-            for (int k = 0; k < images[i].length; k++) {
-                for (int j = 0; j < images[i].length; j++) {
+            int length = images[i].length;
+            for (int k = 0; k < length; k++) {
+                for (int j = 0; j < length; j++) {
                 Neuron neuron = InputLayer.getNeuron(index);
                 neuron.setValue(images[i][k][j]);
                 index++;
@@ -89,7 +103,7 @@ public class Test {
             //Ustawienie odpowiedzi
              desiredAns = labels[i];
              // feed-forward
-             neuralNetwork.propagate();
+             neuralNetwork.passForward();
              for (int j=0;j<OutputLayer.size();j++) {
                     Neuron neuron = OutputLayer.getNeuron(j);
                     max[1] = Math.max(max[1], neuron.getValue());
@@ -115,36 +129,12 @@ public class Test {
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci
-        double accuracy = roundToDecimals(100-(double)badRecognizedCount/(double)read.getTestPatternsCount()*100,2);
+        double accuracy = NeuralUtil.roundToDecimals(100-(double)badRecognizedCount/(double)read.getTestPatternsCount()*100,2);
         System.out.println("----");
         System.out.println("Bad recognized images: " + badRecognizedCount
                 + "/" + read.getTestPatternsCount() + " accuracy: "
                 + accuracy + "%");
 
-    }
-
-    private static String chooseFile() throws IOException {
-         File file = new File("weights/");
-
-         File[] fileTab;
-         if ((fileTab = file.listFiles()) != null ) {
-             for (int i = 0; i < fileTab.length; i++) {
-                 String ext = fileTab[i].getName().substring(fileTab[i].getName().length()-3, fileTab[i].getName().length());
-                    if (ext.equals("dat"))
-                    System.out.println(i + ": " + fileTab[i].getName());
-             }
-             System.out.print("Plik zawierający wagi sieci: ");
-             BufferedReader in
-                = new BufferedReader(new InputStreamReader(System.in));
-             String number = in.readLine();
-             return fileTab[Integer.parseInt(number)].getName();
-         }
-     return null;
-    }
-
-    private static double roundToDecimals(double d, int c) {
-        int temp=(int)((d*Math.pow(10,c)));
-        return (((double)temp)/Math.pow(10,c));
     }
 
     private  static ArrayList<Integer> prepareData() {

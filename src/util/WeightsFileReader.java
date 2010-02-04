@@ -14,7 +14,7 @@ import java.io.IOException;
  *
  * @author tm
  */
-public class WeightsFileReader extends DataInputStream {
+public final class WeightsFileReader extends DataInputStream {
 
     String fileName;
     int count;

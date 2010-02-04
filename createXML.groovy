@@ -1,33 +1,52 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 import groovy.xml.MarkupBuilder
 import groovy.xml.*
 import javax.xml.parsers.DocumentBuilderFactory
 import groovy.xml.dom.DOMCategory
 
-for (int i=30; i <= 300; i+=10) {
-    def network = new XmlSlurper().parse("mainconfig.xml")
+
+
+
+
+def istart=10;//do podzialu na katalogi
+def k = 1;
+for (int i=10; i <= 300; i+=10) {
+    def network = new XmlSlurper().parse("parameters.xml")
+    if (i == istart+30) {istart=i; k++;} 
     
     network.parameters.hidden = i
     def algorithm = network.parameters.algorithm 
     def algId = network.algorithm.find { it.name == algorithm }.@id
-    network.parameters.weights_file = algId + "_" + i + ".dat"	//plik do zapisu wag
+    def parameters = network.algorithm.find { it.name == algorithm }.parameter
+    parameters.collect {it.toDouble()}
+    //String s = "_"
+    //for (int w=0; w<parameters.size();w++){
+    //	s += parameters[w];
+    //	s += "_";}
     
-    def outputBuilder = new StreamingMarkupBuilder()
-    String result = XmlUtil.serialize(outputBuilder.bind{ mkp.yield network })
-	
-    /*---------------tworzenie plikow-------------------------------*/
-    def fw = null
-    try {
-            fw = new OutputStreamWriter(new FileOutputStream("config/parameters_" + algId + "_" + i + ".xml"))
+    for (int j=1; j<=30; j++) {
+	if (j<10) jnr = "0";
+	else jnr = "";
+	if (i<100) inr = "0";
+	else inr = "";
+
+	String outdir = algId.text() + "/30epoch/"// <------------------nazwa badania----------
+
+    	network.parameters.weights_file = "weights/" + outdir + algId + "_" + inr + i + "_" + jnr + j +".dat"	//plik do zapisu wag
+
+    	def outputBuilder = new StreamingMarkupBuilder()
+    	String result = XmlUtil.serialize(outputBuilder.bind{ mkp.yield network })
+    	
+	/*---------------tworzenie plikow-------------------------------*/
+    	def fw = null
+    	try {
+            File dir = new File("config/" + outdir + algId + k);
+	        dir.mkdirs();
+            fw = new OutputStreamWriter(new FileOutputStream(dir.getPath() + "/" + algId + "_" + inr + i + "_" + jnr + j + ".xml"))
             fw << result
-    } finally {
+    	} finally {
             fw?.close()
+    	}
     }
-    
 }
 
 

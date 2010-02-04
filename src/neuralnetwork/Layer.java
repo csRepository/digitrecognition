@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * a list of the neurons.
  * @author tm
  */
-public class Layer extends ArrayList {
+public class Layer extends ArrayList<Neuron> {
 	
 	//private ArrayList neurons;
 
@@ -24,6 +24,6 @@ public class Layer extends ArrayList {
          * @return Neuron
          */
 	public Neuron getNeuron(int n) {
-		return (Neuron) get(n);
+		return get(n);
 	  }
 }

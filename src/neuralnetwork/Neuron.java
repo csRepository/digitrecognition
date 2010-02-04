@@ -21,33 +21,34 @@ public class Neuron {
         /**
          * Wyliczenie wartosci wyjscia neuronu po zastosowaniu funkcji aktywacji
          */
-	public void computeOutput()
-	  {
+	public void computeOutput() {
 	    double sum=0.0;
-	    for (int i=0; i< getIncomingSyn().size(); i++) {
-	    	sum += getIncomingSyn().get(i).getValue() * getIncomingSyn().get(i).getFromNeuron().getValue();
+            Synapse syn;
+	    for (int i=0; i< incomingSyn.size(); i++) {
+                syn = incomingSyn.get(i);
+	    	sum += syn.getValue() * syn.getFromNeuron().getValue();
 	    }
-	  this.setValue(sigm(sum)); // sigmoid function
+	  value = sigm(sum); // sigmoid function
           
 	  }
 
-        public double tanh (double u)
+        private static  double tanh (double u)
         {
             double a = Math.exp( u );
             double b = Math.exp( -u );
             return ((a-b)/(a+b));
         }
 
-        public double sigm (double u)
+        private static double sigm (double u)
         {
             return 1.0 / (1 + Math.exp(-1.0 * u));
         }
 
-        public double sigmDerivative(double d) {
-            return d * (1.0 - d) ;
+        public  double sigmDerivative(double d) {
+            return d * (1.0 - d);
 	}
 
-        public double tanhDerivative(double d) {
+        public  double tanhDerivative(double d) {
             return  (1 + d) * (1 - d);
 	}
 

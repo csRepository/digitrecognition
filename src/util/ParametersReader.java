@@ -12,7 +12,7 @@ import org.w3c.dom.NodeList;
  *
  * @author tm
  */
-public class ParametersReader {
+public final class ParametersReader {
 
     XPathReader reader;
 
