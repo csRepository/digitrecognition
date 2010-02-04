@@ -5,6 +5,7 @@
 
 package util;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,7 +19,7 @@ import neuralnetwork.Neuron;
  *
  * @author tm
  */
-public class WeightsFileUtil {
+public final class WeightsFileUtil {
 
     public static double[] readWeights(NeuralNet net, String fileName) throws IOException {
         WeightsFileReader wFile = null;
@@ -54,17 +55,19 @@ public class WeightsFileUtil {
          int nOut = net.getLayer(2).size();
          int weightsCount = nIn * (nHidd - 1) + nHidd * nOut;
          try {
-
              double data[] = new double[weightsCount];
-             wFile = new WeightsFileWriter(fileName, weightsCount);
-             for (int i=1; i<net.getLayers().size();i++) {
-                    for (int j=0;j<net.getLayer(i).size();j++) {
-                        Neuron neuron = net.getLayer(i).getNeuron(j);
-                        for (int k=0;k<neuron.getIncomingSyn().size();k++)
-                           data[++w] = neuron.getIncomingSyn().get(k).getValue();
-                    }
-             }
-             wFile.writeData(data);
+             File file = new File(fileName);
+             file = file.getParentFile();
+             file.mkdirs();
+                 wFile = new WeightsFileWriter(fileName, weightsCount);
+                 for (int i=1; i<net.getLayers().size();i++) {
+                        for (int j=0;j<net.getLayer(i).size();j++) {
+                            Neuron neuron = net.getLayer(i).getNeuron(j);
+                            for (int k=0;k<neuron.getIncomingSyn().size();k++)
+                               data[++w] = neuron.getIncomingSyn().get(k).getValue();
+                        }
+                 }
+                 wFile.writeData(data);
         } catch (IOException ex) {
             System.err.println("Blad I/O pliku: " + ex);
         } finally {

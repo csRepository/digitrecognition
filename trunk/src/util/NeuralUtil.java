@@ -17,7 +17,7 @@ import java.util.Random;
  * Class that contains methods for handling train and test programs.
  * @author tm
  */
-public class NeuralUtil {
+public final class NeuralUtil {
     /*
      * Wczytuje plik konfiguracyjny z parametrami sieci
      */
@@ -33,7 +33,7 @@ public class NeuralUtil {
         }
         else {
                 System.err.println("Brak parametru z plikiem konfiguracyjnym" +
-                                    "np. java Train \"parameters.xml\" ");
+                                    " np. java Train \"parameters.xml\" ");
                 System.exit(1);
         }
         return null;
@@ -59,10 +59,10 @@ public class NeuralUtil {
     /*
      * Przygotowuej tablice wszystkich wyjsc (tablica [nr][tablica_wyjsc[10])
      */
-    public static int[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
-        int tab[][] = new int[array.size()][10];
+    public static double[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
+        double tab[][] = new double[array.size()][10];
         for (int i = 0; i < array.size(); i++) {
-            int d[] = new int[outSize];
+            double d[] = new double[outSize];
             for (int j = 0; j < outSize; j++)
                 d[j] = 0;
             d[ getLabel(array.get(i), data, dataType) ] = 1;
@@ -149,5 +149,11 @@ public class NeuralUtil {
       private static double normalize(int value,int max,int min,double new_max,double new_min) {
             double new_value = (double) (value - min) / (max - min) * (new_max - new_min) + new_min;
             return new_value;
-        }
+      }
+      
+    public static double roundToDecimals(double d, int c) {
+        int temp=(int)((d*Math.pow(10,c)));
+        return (((double)temp)/Math.pow(10,c));
+    }
+
 }

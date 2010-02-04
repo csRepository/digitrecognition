@@ -1,5 +1,6 @@
 package algorithm;
 
+import java.util.ArrayList;
 import neuralnetwork.Neuron;
 import neuralnetwork.Synapse;
 
@@ -21,20 +22,18 @@ public class BackPropagation extends Propagation{
 
     @Override
     public void changeWeights(Neuron neuron) {
-        for (int i=0;i<neuron.getIncomingSyn().size();i++) {
-            Synapse syn = neuron.getIncomingSyn().get(i);
-            syn.setDelta(-learningRate * syn.getGradient() + momentum * syn.getDelta());
-            syn.setValue(syn.getValue()+syn.getDelta());
+        Synapse syn;
+        ArrayList<Synapse> incSyns = neuron.getIncomingSyn();
+        int synSize = incSyns.size();
+        for (int i=0;i< synSize;i++) {
+            syn = incSyns.get(i);
+            double delta = -learningRate * syn.getGradient() + momentum * syn.getDelta();
+            syn.setDelta(delta);
+            syn.setValue(syn.getValue() + delta);
+           // syn.setValue(syn.getValue()*(1-(0.001*learningRate)/Math.pow(1+syn.getValue()*syn.getValue(),2))); //weight decay
         }
     }
 
-    @Override
-    public void calcUpdate(Neuron neuron) {
-           for (int i=0;i<neuron.getIncomingSyn().size();i++) {
-            Synapse syn = neuron.getIncomingSyn().get(i);
-            syn.setGradient(syn.getGradient()+getActualGradient(neuron,syn));
-        }
-     }
     /**
      * @param momentum the momentum to set
      */

@@ -6,7 +6,7 @@
         <hidden>30</hidden>                     <!-- l. neur. ukrytch nie uwzgledniajac neuronu bias -->
         <patterns>
             <train>
-                <count>300</count>              <!--  liczba wzorcow testujacych -->
+                <count>300</count>              <!--  liczba wzorcow trenujacych -->
                 <set>train</set>                <!-- rodzaj zbioru (train/test) -->
             </train>                            
             <test>
@@ -15,12 +15,15 @@
             </test>
             <preprocess>scale</preprocess>          <!-- binarize/scale (binaryzacja/skalowanie danych wejsciowych) -->
         </patterns>
-        <error>0.45</error>                            <!-- max. blad RMS   - 0 jesli nie uwzgledniac-->
-        <epochs>5</epochs>                         <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
+        <error>0</error>                            <!-- max. blad RMS   - 0 jesli nie uwzgledniac-->
+        <epochs>30</epochs>                         <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
+        <accuracy>100</accuracy>
         <algorithm>ResilentPropagation</algorithm>  <!-- BackPropagation/QuickPropagation/ResilentPropagation/
                                                      DeltaBarDelta/SuperSAB -->
         <change_method>batch</change_method>       <!-- zmiana wag (online/batch) -->
-        <weights_file>rp_30.dat</weights_file>      <!-- plik do zapisu(Train), odczytu(Test) wag -->
+        <weights_file>weights/qppp/qp_150_0001.dat</weights_file>      <!-- plik do zapisu(Train), odczytu(Test) wag -->
+        <weights_decay>0.0001</weights_decay>
+        <backprop_skip>false</backprop_skip>
     </parameters>
     <!--======================= parametry algorytmów =======================-->
     <algorithm id="bp">
@@ -30,18 +33,19 @@
     </algorithm>
     <algorithm id="rp">
          <name>ResilentPropagation</name>        <!--resilentpropagation-->
-         <parameter attr="deltamax">1.0</parameter>
+         <parameter attr="deltamax">50.0</parameter>
          <parameter attr="deltamin">0.000001</parameter>
-         <parameter attr="deltazero">0.075</parameter>
+         <parameter attr="deltazero">0.05</parameter>
          <parameter attr="decfactor">0.5</parameter>
          <parameter attr="incfactor">1.2</parameter>
     </algorithm>
      <algorithm id="qp">                <!--quickpropagation-->
          <name>QuickPropagation</name>
-         <parameter attr="learning_rate">0.01</parameter>
+         <parameter attr="learning_rate">0.15</parameter>
          <parameter attr="momentum">0.9</parameter>
          <parameter attr="mode_switch_treshold">0.0</parameter>
          <parameter attr="max_growth_factor">1.75</parameter>
     </algorithm>
+  
 
 </network>

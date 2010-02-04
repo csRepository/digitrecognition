@@ -9,7 +9,7 @@ import java.io.IOException;
  *
  * @author tm
  */
-public class WeightsFileWriter extends DataOutputStream {
+public final class WeightsFileWriter extends DataOutputStream {
 
     String fileName;
 

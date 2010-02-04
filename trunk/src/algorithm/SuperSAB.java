@@ -12,7 +12,7 @@ import neuralnetwork.Synapse;
  */
 public class SuperSAB extends Propagation{
     	private double momentum = 0.9;
-        public SuperSAB() {
+        public SuperSAB(double[] parameters) {
    
         }
 
@@ -27,13 +27,6 @@ public class SuperSAB extends Propagation{
             }
         }
 
-    @Override
-        public void calcUpdate(Neuron neuron) {
-               for (int i=0;i<neuron.getIncomingSyn().size();i++) {
-                Synapse syn = neuron.getIncomingSyn().get(i);
-                syn.setGradient(syn.getGradient()+getActualGradient(neuron,syn));
-            }
-        }
 
     /**
      * @param momentum the momentum to set
