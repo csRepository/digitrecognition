@@ -78,7 +78,25 @@ public final class WeightsFileUtil {
             }
         }
     }
-
+    public static void writeWeights(double data[], String fileName) {
+         int w = -1;
+         WeightsFileWriter wFile = null;
+         try {
+             File file = new File(fileName);
+             file = file.getParentFile();
+             file.mkdirs();
+                 wFile = new WeightsFileWriter(fileName, data.length);
+                 wFile.writeData(data);
+        } catch (IOException ex) {
+            System.err.println("Blad I/O pliku: " + ex);
+        } finally {
+            try {
+                wFile.close();
+            } catch (IOException ex) {
+                Logger.getLogger(WeightsFileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     private static String getDateTime() {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy_HH:mm");
         Date date = new Date();

@@ -3,15 +3,11 @@ import groovy.xml.*
 import javax.xml.parsers.DocumentBuilderFactory
 import groovy.xml.dom.DOMCategory
 
-
-
-
-
 def istart=10;//do podzialu na katalogi
 def k = 1;
 for (int i=10; i <= 300; i+=10) {
     def network = new XmlSlurper().parse("parameters.xml")
-    if (i == istart+30) {istart=i; k++;} 
+    if (i == istart+40) {istart=i; k++;} 
     
     network.parameters.hidden = i
     def algorithm = network.parameters.algorithm 
@@ -23,13 +19,13 @@ for (int i=10; i <= 300; i+=10) {
     //	s += parameters[w];
     //	s += "_";}
     
-    for (int j=1; j<=30; j++) {
+    for (int j=1; j<=25; j++) {
 	if (j<10) jnr = "0";
 	else jnr = "";
 	if (i<100) inr = "0";
 	else inr = "";
 
-	String outdir = algId.text() + "/30epoch/"// <------------------nazwa badania----------
+	String outdir = algId.text() + "/standard_param/"// <------------------nazwa badania----------
 
     	network.parameters.weights_file = "weights/" + outdir + algId + "_" + inr + i + "_" + jnr + j +".dat"	//plik do zapisu wag
 
