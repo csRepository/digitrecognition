@@ -2,10 +2,7 @@ import database.MNISTDatabase;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import util.WeightsFileUtil;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import neuralnetwork.Layer;
 import neuralnetwork.NeuralNet;
@@ -139,17 +136,11 @@ public class Test {
 
     private  static ArrayList<Integer> prepareData() {
         ArrayList<Integer> testArray = new ArrayList();
-        NeuralUtil.setPatterns(testArray,read.getTestPatternsCount(),10000); //wybor wzorcow z bazy wz. uczacych
-        try {
-            images = NeuralUtil.prepareInputSet(testArray, dataMNIST, read.getTestDataSet(), read.getPreprocessMethod());
-        } catch (Exception ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        NeuralUtil.setPatterns(testArray,read.getTestPatternsCount(),1,10000); //wybor wzorcow z bazy wz. uczacych
+        images = NeuralUtil.prepareInputSet(testArray, dataMNIST, read.getTestDataSet(), read.getPreprocessMethod());
         labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, read.getTestDataSet());
-
         return testArray ;
     }
-
     /*
      * Ustawia wartosc neuronow typu bias
      */

@@ -3,33 +3,30 @@
 <network>
     <!--=======================parametry sieci==============================-->
     <parameters>
-        <hidden>30</hidden>                     <!-- l. neur. ukrytch nie uwzgledniajac neuronu bias -->
+        <hidden>10</hidden>                     <!-- l. neur. ukrytch nie uwzgledniajac neuronu bias -->
         <patterns>
-            <train>
-                <count>300</count>              <!--  liczba wzorcow trenujacych -->
-                <set>train</set>                <!-- rodzaj zbioru (train/test) -->
-            </train>                            
-            <test>
-                <count>10000</count>                <!--  liczba wzorcow testujacych -->
-                <set>test</set>                      <!-- rodzaj zbioru (train/test) -->
-            </test>
+            <train count="5000" set="train"/>
+            <validate count="1000" set="train"/>
+            <test count="10000" set="test"/>
             <preprocess>scale</preprocess>          <!-- binarize/scale (binaryzacja/skalowanie danych wejsciowych) -->
         </patterns>
         <error>0</error>                            <!-- max. blad RMS   - 0 jesli nie uwzgledniac-->
-        <epochs>30</epochs>                         <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
-        <accuracy>100</accuracy>
-        <algorithm>ResilentPropagation</algorithm>  <!-- BackPropagation/QuickPropagation/ResilentPropagation/
+        <epochs>100</epochs>                         <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
+        <accuracy>0</accuracy>
+        <algorithm>BackPropagation</algorithm>  <!-- BackPropagation/QuickPropagation/ResilentPropagation/
                                                      DeltaBarDelta/SuperSAB -->
-        <change_method>batch</change_method>       <!-- zmiana wag (online/batch) -->
-        <weights_file>weights/qppp/qp_150_0001.dat</weights_file>      <!-- plik do zapisu(Train), odczytu(Test) wag -->
-        <weights_decay>0.0001</weights_decay>
-        <backprop_skip>false</backprop_skip>
+        <change_method>online</change_method>       <!-- zmiana wag (online/batch) -->
+        <weights_file>weights/qp_150.dat</weights_file>      <!-- plik do zapisu(Train), odczytu(Test) wag -->
+        <weights_decay>0</weights_decay>        <!-- współczynnik zanikania wag-->
+        <backprop_skip>false</backprop_skip>    <!--okresla czy pomijac wzorce nauczone-->
+        <validate>true</validate>  <!--okresla czy przeprowadzac walidacje na odpowiednim zbiorze w trakcie uczenia-->
+        <test>false</test>          <!--okresla czy przeprowadzac testowanie na odpowiednim zbiorze w trakcie uczenia-->
     </parameters>
     <!--======================= parametry algorytmów =======================-->
     <algorithm id="bp">
         <name>BackPropagation</name>         <!-- backpropagation -->
         <parameter attr="learning_rate">0.1</parameter>
-        <parameter attr="momentum">0.8</parameter>
+        <parameter attr="momentum">0.9</parameter>
     </algorithm>
     <algorithm id="rp">
          <name>ResilentPropagation</name>        <!--resilentpropagation-->
@@ -46,6 +43,4 @@
          <parameter attr="mode_switch_treshold">0.0</parameter>
          <parameter attr="max_growth_factor">1.75</parameter>
     </algorithm>
-  
-
 </network>

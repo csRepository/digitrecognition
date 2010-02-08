@@ -21,17 +21,23 @@ class GPathReader {
         def count = network.parameters.hidden.toInteger()
     }
     int getTrainPatternsCount() {
-        def count = network.parameters.patterns.train.count.toInteger()
+        def count = network.parameters.patterns.train.@count.toInteger()
     }
     int getTestPatternsCount() {
-        def count = network.parameters.patterns.test.count.toInteger()
+        def count = network.parameters.patterns.test.@count.toInteger()
+    }
+    int getValidatePatternsCount() {
+        def count = network.parameters.patterns.validate.@count.toInteger()
     }
     String getTrainDataSet() {
-        def set = network.parameters.patterns.train.set.text()
+        def set = network.parameters.patterns.train.@set.text()
     }
 
     String getTestDataSet() {
-        def set = network.parameters.patterns.test.set.text()
+        def set = network.parameters.patterns.test.@set.text()
+    }
+    String getValidateDataSet() {
+        def set = network.parameters.patterns.validate.@set.text()
     }
     String getPreprocessMethod() {
         def method = network.parameters.patterns.preprocess.text()
@@ -56,6 +62,12 @@ class GPathReader {
     }
     boolean isBackpropSkip() {
         def is = network.parameters.backprop_skip.toBoolean()
+    }
+    boolean isValidate() {
+        def is = network.parameters.validate.toBoolean()
+    }
+    boolean isTest() {
+        def is = network.parameters.test.toBoolean()
     }
     double[] getParameters(String name) {
         def parameters = network.algorithm.find { it.name == name}.parameter

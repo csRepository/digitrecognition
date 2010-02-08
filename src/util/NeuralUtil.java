@@ -12,24 +12,26 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that contains methods for handling train and test programs.
  * @author tm
  */
 public final class NeuralUtil {
+  //  private static HashMap map;
     /*
      * Wczytuje plik konfiguracyjny z parametrami sieci
      */
     public static GPathReader readConfigFile(String[] args) {
-         GPathReader read;
                 if (args.length > 0) {
                 File file = new File(args[0]);
                 if (!file.exists()) {
                      System.err.println("Brak pliku konfiguracyjnego");
                      System.exit(1);
                 } else
-                  return  read = new GPathReader(args[0]);
+                  return  new GPathReader(args[0]);
         }
         else {
                 System.err.println("Brak parametru z plikiem konfiguracyjnym" +
@@ -46,13 +48,29 @@ public final class NeuralUtil {
      * @param method    data preprocess method (Method must be defined in NeuralUtil class)
      * @return
      */
-    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data, String dataType, String methodName) throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data, String dataType, String methodName) {
         double[][][] tab = new double[array.size()][][];
         for (int i = 0; i < array.size(); i++) {
             Object[] methodParam =  new Object[] {getImage(array.get(i), data, dataType)};
-            Method method = NeuralUtil.class.getDeclaredMethod(methodName,new Class[] {int[][].class});
-            tab[i] = (double[][]) method.invoke(NeuralUtil.class, methodParam);
+            Method method = null;
+            try {
+                method = NeuralUtil.class.getDeclaredMethod(methodName, new Class[]{int[][].class});
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                tab[i] = (double[][]) method.invoke(NeuralUtil.class, methodParam);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+     //   System.out.println("");
         return tab;
     }
 
@@ -61,25 +79,40 @@ public final class NeuralUtil {
      */
     public static double[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
         double tab[][] = new double[array.size()][10];
+        //map = new HashMap();
         for (int i = 0; i < array.size(); i++) {
             double d[] = new double[outSize];
             for (int j = 0; j < outSize; j++)
                 d[j] = 0;
             d[ getLabel(array.get(i), data, dataType) ] = 1;
             tab[i] = d;
+//            if (map.containsKey(getLabel(array.get(i), data, dataType))) {
+//                int value = (Integer)map.get(getLabel(array.get(i), data, dataType));
+//                value++;
+//                map.put(getLabel(array.get(i), data, dataType), value);
+//            } else
+//            map.put(getLabel(array.get(i), data, dataType), 1);
         }
+      //  System.out.println(map);
         return tab;
     }
 
      /*
      * Tworzy tabice z numerami wzorcow (jednakowy rozrzut pomiedzy wzorcami)
      */
-    public static List setPatterns(ArrayList array,int patternCount,int size) {
-        for(int i = 1; i <= size; i++) {
+    public static void setPatterns(ArrayList array,int patternCount,int startPattern, int endPattern) {
+        int size = endPattern - startPattern + 1;
+        for(int i = startPattern; i <= endPattern; i++) {
                // if (i % (size/patternCount) == 0 && i == 0) array.add(i+1);
                 if (i % (size/patternCount) == 0) array.add(i);
             }
-        return array;
+    }
+
+    public static void setValidatePatterns(ArrayList array,int patternCount,int size) {
+        for(int i = 50001; i <= size; i++) {
+               // if (i % (size/patternCount) == 0 && i == 0) array.add(i+1);
+                if (i % (10000/patternCount) == 0) array.add(i);
+            }
     }
 
         /*
