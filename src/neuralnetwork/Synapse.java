@@ -1,7 +1,5 @@
 package neuralnetwork;
 
-import java.util.Random;
-
 /**
  * Makes a connection between two neighbours layers.
  * @author tm
@@ -10,21 +8,18 @@ public class Synapse {
 
     private double value;
     private double delta; //rprop and backprop weight change
-    private double prevDelta;
     private double gradient ;  //weight gradient
     private double prevGradient;
     private double updateValue;    //RProp
     private double learningRate;    //Delta-bar-delta
     private Neuron fromNeuron;
     private Neuron toNeuron;
-    private Random random = new Random();
 
     public Synapse(Neuron f, Neuron t) {
         fromNeuron = f;
         toNeuron = t;
         t.getIncomingSyn().add(this);
         f.getOutgoingSyn().add(this);
-        value = random.nextDouble() * 2 * 0.25 - 0.25;
         learningRate = 0.005;
     }
 
@@ -55,15 +50,6 @@ public class Synapse {
     public void setDelta(double delta) {
         this.delta = delta;
     }
-
-    public double getPrevDelta() {
-        return prevDelta;
-    }
-
-    public void setPrevDelta(double prevDelta) {
-        this.prevDelta = prevDelta;
-    }
-
     /**
      * @return the value
      */

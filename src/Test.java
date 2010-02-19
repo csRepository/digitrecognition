@@ -31,7 +31,6 @@ public class Test {
 
     public static void main(String[] args) throws IOException {
 
-        //read = NeuralUtil.readConfigFile(args);
         read = new GPathReader(args[0]);
 
         nIn = 28*28+1; //wielkosc obrazu + bias
@@ -43,11 +42,11 @@ public class Test {
         InputLayer = neuralNetwork.getLayer(0);
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
 
-        setBiases();
+        NeuralUtil.setBiases(neuralNetwork);
         //connect layers
         neuralNetwork.connectLayers(nIn, nHidd-1,0,1);
         neuralNetwork.connectLayers(nHidd, nOut,1,2);
-        //create database object
+        //create database 
         dataMNIST = new MNISTDatabase();
        
        /*-----------------read weights----------------------------------------*/
@@ -81,48 +80,16 @@ public class Test {
         patternsNr = prepareData();
         /*-----------------Digit recogntion----------------------------------*/
         System.out.println("Process: Patterns recognition...");
-        // wczytanie obrazow
-        double max[] = new double[2];
-        double pom = 0;
+      
         int badRecognizedCount = 0;
 
         for (int i=0;i<patternsNr.size();i++) {
             //Ustawienie wzorca
-            int index = 0;
-            int length = images[i].length;
-            for (int k = 0; k < length; k++) {
-                for (int j = 0; j < length; j++) {
-                Neuron neuron = InputLayer.getNeuron(index);
-                neuron.setValue(images[i][k][j]);
-                index++;
-                }
-            }
-            //Ustawienie odpowiedzi
-             desiredAns = labels[i];
+              NeuralUtil.setInputLayer(InputLayer,i, images);
+              desiredAns = NeuralUtil.setOutputLayer(i, labels);
              // feed-forward
              neuralNetwork.passForward();
-             for (int j=0;j<OutputLayer.size();j++) {
-                    Neuron neuron = OutputLayer.getNeuron(j);
-                    max[1] = Math.max(max[1], neuron.getValue());
-                    if (max[1]!=pom) {
-                        max[0] = OutputLayer.indexOf(neuron);
-                        pom = max[1];
-                    }
-            }
-             //jesli wyjscie odpowiedzi oczekiwanych != 1 czyli cyfra z bazy nie odpowiada
-             //najwiekszemu wyjsciu to cyfra nie zostala rozpoznana
-             int digit = 0;
-             if (desiredAns[(int)max[0]]!= 1)
-             {
-                 for (int j = 0; j < desiredAns.length; j++) {
-                     if (desiredAns[j] == 1)  digit = j;
-                 }
-                 ++badRecognizedCount;
-//                 System.out.println(badRecognizedCount + ": Digit: " + digit + " Recognized: " +
-//                    + (int)max[0] + " value: " + max[1] + " patternNr:" + patternsNr.get(i) );
-            }
-            max[1] = 0;
-            pom = 0;
+             badRecognizedCount += NeuralUtil.validate(OutputLayer, desiredAns);
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci
@@ -131,7 +98,6 @@ public class Test {
         System.out.println("Bad recognized images: " + badRecognizedCount
                 + "/" + read.getTestPatternsCount() + " accuracy: "
                 + accuracy + "%");
-
     }
 
     private  static ArrayList<Integer> prepareData() {
@@ -141,13 +107,6 @@ public class Test {
         labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, read.getTestDataSet());
         return testArray ;
     }
-    /*
-     * Ustawia wartosc neuronow typu bias
-     */
-    private static void setBiases() {
-         for (int i = 0; i < neuralNetwork.getLayers().size()-1; i++) {
-            Layer layer = neuralNetwork.getLayer(i);
-            layer.getNeuron(layer.size()-1).setValue(1);
-        }
-    }
+
+
 }

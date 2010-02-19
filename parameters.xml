@@ -3,24 +3,24 @@
 <network>
     <!--=======================parametry sieci==============================-->
     <parameters>
-        <hidden>10</hidden>                     <!-- l. neur. ukrytch nie uwzgledniajac neuronu bias -->
+        <hidden>30</hidden>                     <!-- l. neur. ukrytch nie uwzgledniajac neuronu bias -->
         <patterns>
-            <train count="5000" set="train"/>
-            <validate count="1000" set="train"/>
+            <train count="300" set="train"/>
+            <validate count="100" set="train"/>
             <test count="10000" set="test"/>
             <preprocess>scale</preprocess>          <!-- binarize/scale (binaryzacja/skalowanie danych wejsciowych) -->
         </patterns>
         <error>0</error>                            <!-- max. blad RMS   - 0 jesli nie uwzgledniac-->
         <epochs>100</epochs>                         <!-- liczba iteracji - 0 jesli nie uwzgledniac-->
         <accuracy>0</accuracy>
-        <algorithm>BackPropagation</algorithm>  <!-- BackPropagation/QuickPropagation/ResilentPropagation/
+        <algorithm>ResilentPropagation</algorithm>  <!-- BackPropagation/QuickPropagation/ResilentPropagation/
                                                      DeltaBarDelta/SuperSAB -->
-        <change_method>online</change_method>       <!-- zmiana wag (online/batch) -->
-        <weights_file>weights/qp_150.dat</weights_file>      <!-- plik do zapisu(Train), odczytu(Test) wag -->
-        <weights_decay>0</weights_decay>        <!-- współczynnik zanikania wag-->
+        <change_method>batch</change_method>       <!-- zmiana wag (online/batch) -->
+        <weights_file>weights/qp_150_04.dat</weights_file> <!-- plik do zapisu(Train), odczytu(Test) wag -->
+        <weights_decay>0.0</weights_decay>        <!-- współczynnik zanikania wag-->
         <backprop_skip>false</backprop_skip>    <!--okresla czy pomijac wzorce nauczone-->
         <validate>true</validate>  <!--okresla czy przeprowadzac walidacje na odpowiednim zbiorze w trakcie uczenia-->
-        <test>false</test>          <!--okresla czy przeprowadzac testowanie na odpowiednim zbiorze w trakcie uczenia-->
+        <test>true</test>          <!--okresla czy przeprowadzac testowanie na odpowiednim zbiorze w trakcie uczenia-->
     </parameters>
     <!--======================= parametry algorytmów =======================-->
     <algorithm id="bp">
@@ -38,7 +38,7 @@
     </algorithm>
      <algorithm id="qp">                <!--quickpropagation-->
          <name>QuickPropagation</name>
-         <parameter attr="learning_rate">0.15</parameter>
+         <parameter attr="learning_rate">0.01</parameter>
          <parameter attr="momentum">0.9</parameter>
          <parameter attr="mode_switch_treshold">0.0</parameter>
          <parameter attr="max_growth_factor">1.75</parameter>

@@ -12,7 +12,6 @@ public class NeuralNet {
 	private ArrayList<Layer> layers;
         private double mse;
         private double size;    //wielkosc zbioru wzorcow
-        private double weightSum;
 
         public NeuralNet(int[] layersSizes) {
 		layers = new ArrayList();
@@ -26,7 +25,7 @@ public class NeuralNet {
         }
 
 	/**
-	 * Metoda dodaj�ca warstw� do struktury sieci
+	 * Adding layer to network
 	 * @param n liczba neuron�w
 	 */
 	public void addLayer(int n) {
@@ -110,7 +109,7 @@ public class NeuralNet {
 
         /**
          * Calculate Root Mean Square Error (RMS)
-         * @return zwraca blad rms
+         * @return rms error
          */
         public double calculateRMS() {
             double errorRMS = Math.sqrt(mse/size);
@@ -118,4 +117,39 @@ public class NeuralNet {
             mse=0;
             return errorRMS;
         }
+
+        public void initializeWeights(long seed) {
+            Neuron neuron;
+            Random random = new Random(seed);
+            int layersSize = layers.size();
+            for (int i = 1; i < layersSize; i++) {
+                Layer layer = layers.get(i);
+                for (int j = 0; j < layer.size(); j++) {
+                    neuron = layer.getNeuron(j);
+                    double synCount = neuron.getIncomingSyn().size();
+                    for (int k = 0; k < synCount; k++) {
+                        Synapse syn = neuron.getIncomingSyn().get(k);
+                        double value = random.nextDouble() * 2 * 2.38/Math.sqrt(synCount) - 2.38/Math.sqrt(synCount);
+                        syn.setValue(value);
+                    }
+		}
+            }
+        }
+        public void initializeWeightsDefault(long seed) {
+            Neuron neuron;
+            Random random = new Random(seed);
+            int layersSize = layers.size();
+            for (int i = 1; i < layersSize; i++) {
+                Layer layer = layers.get(i);
+                for (int j = 0; j < layer.size(); j++) {
+                    neuron = layer.getNeuron(j);
+                    for (int k = 0; k < neuron.getIncomingSyn().size(); k++) {
+                        Synapse syn = neuron.getIncomingSyn().get(k);
+                        double value = random.nextDouble() * 2 * 0.25 - 0.25;
+                        syn.setValue(value);
+                    }
+		}
+            }
+        }
+
 }

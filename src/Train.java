@@ -1,7 +1,7 @@
+import algorithm.Propagation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
-import algorithm.*;
 import neuralnetwork.*;
 import database.MNISTDatabase;
 import util.WeightsFileUtil;
@@ -16,7 +16,6 @@ import java.lang.reflect.Constructor;
 public class Train {
 
     private static Layer InputLayer,OutputLayer;	//  warstwa wejsciowa, warstwa wyjsciowa
-    private static int nIn,nHidd,nOut;      //liczba neuronow wej.,ukryt.,wyj.
     private static NeuralNet neuralNetwork;
     private static MNISTDatabase dataMNIST;             //baza danych cyfr
     private static double actualRMS;
@@ -62,11 +61,11 @@ public class Train {
         test = read.isTest();
 
         // -------------------------------------------------------------------
-        nIn = 28*28+1; //image size + bias
-        nHidd = read.getHiddNeuronsCount()+1;  //l. neuronow + bias
-        nOut = 10;
+        int nIn = 28*28+1;                         //image size + bias
+        int nHidd = read.getHiddNeuronsCount()+1;  //neurons count + bias
+        int nOut = 10;                             //10 digit classes
         int net[] = {nIn,nHidd,nOut};
-        neuralNetwork = new NeuralNet(net); // creating neural net
+        neuralNetwork = new NeuralNet(net);        // creating neural net
       
         InputLayer = neuralNetwork.getLayer(0);
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
@@ -75,15 +74,16 @@ public class Train {
            int weightsCount = nIn * (nHidd - 1) + nHidd * nOut; //wag count
            weightsCopy = new double[weightsCount];
         /*---------------------------------------*/
-        setBiases();
+        NeuralUtil.setBiases(neuralNetwork);
         
         /*-------------- connect layers ----------------------------------*/
         neuralNetwork.connectLayers(nIn, nHidd-1,0,1);
         neuralNetwork.connectLayers(nHidd, nOut,1,2);
+        neuralNetwork.initializeWeights(getSeed());
         /* ------------- algorithm param ----------------------------------*/
         algorithm = read.getDefaultAlgorithm();
         double[] algParam = read.getParameters(algorithm);
-        /* -------make object of algorithm class -------------------------*/
+        /* -------make instance of algorithm class -------------------------*/
         try {
             Class c = Class.forName("algorithm." + algorithm);
             if (read.getParameters(algorithm) != null) {
@@ -109,7 +109,6 @@ public class Train {
                     alg.initialize(neuralNetwork.getLayer(i).getNeuron(j));
         }
 
-        // neuralNetwork.initializeWeights(nIn, nHidd);
         System.out.println("------\n" + "Data set: " + read.getTrainDataSet());
         if (validate)
             System.out.println("Image count: train|validate " + trainPatternsCount + "|" + validatePatternsCount);
@@ -137,11 +136,11 @@ public class Train {
          //epoch && accuracy
          else if ((epochsCount != 0) && (accuracy != 0)) do learn();
              while ((trainAccuracy < accuracy) && (licz < epochsCount));
-         //epoch and valdiation
+         //epoch && valdiation
          else if (epochsCount!=0 && validate) do learn();              
-             while (licz < epochsCount && licz < epochStopNr );
+             while (licz < epochsCount && (licz < epochStopNr || licz < 20));
          // epoch 
-         else if (epochsCount!=0 ) do learn();
+         else if (epochsCount!=0) do learn();
              while (licz < epochsCount);
          // error 
          else if (rms!=0) do learn();
@@ -161,7 +160,7 @@ public class Train {
                 " Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
         }
         else {
-            System.out.printf("\nValidation accuracy: %.2f%% \nEpochs: %d\n", accuracy, licz);
+            System.out.printf("\nValidation accuracy: %.2f%% \nEpochs: %d\n", trainAccuracy, licz);
             System.out.println("Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
         }
              // System.out.println(NeuralUtil.roundToDecimals((double)time/60000,2)+" min");
@@ -188,13 +187,14 @@ public class Train {
             if (validate) endPattern = 50000;  //z walidacja zbior trenujacy mniejszy o 10000
         }
         else if (typeOfSet.equals("test")) {
-             endPattern = 10000;
+            dataSet = read.getTestDataSet();
+            endPattern = 10000;
         }
         else startPattern = 50001;
         NeuralUtil.setPatterns(trainArray,patternsCount,startPattern, endPattern); //wybor wzorcow z bazy wz. uczacych
    
         images = NeuralUtil.prepareInputSet(trainArray, dataMNIST, dataSet, preprocesMethod);
-        labels = NeuralUtil.prepareOutputSet(trainArray, nOut, dataMNIST, dataSet);
+        labels = NeuralUtil.prepareOutputSet(trainArray, OutputLayer.size(), dataMNIST, dataSet);
         
         for (int i = 0; i < patternsCount; i++)
             pattNrs.add(i);
@@ -216,16 +216,6 @@ public class Train {
         }
     }
 
-    /*
-     * Set values of bias neurons.
-     */
-    private static void setBiases() {
-         for (int i = 0; i < neuralNetwork.getLayers().size()-1; i++) {
-            Layer layer = neuralNetwork.getLayer(i);
-            layer.getNeuron(layer.size()-1).setValue(1);
-        }
-    }
-
     private static void learn() {
         licz++;
         if (method.equals("online"))
@@ -236,10 +226,10 @@ public class Train {
         //-------------------     validate       --------------------------
         if (validate) {
            for (int i=0; i < validatePatternsCount;i++) {
-              setInputLayer(validatePatternsNr.get(i), validateImages);
-              setOutputLayer(validatePatternsNr.get(i), validateLabels);
+              NeuralUtil.setInputLayer(InputLayer,validatePatternsNr.get(i), validateImages);
+              desiredAns = NeuralUtil.setOutputLayer(validatePatternsNr.get(i), validateLabels);
               neuralNetwork.passForward();
-              badRecognizedCount += validate();
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
            }
            //-----------------blad klasyfikacji-----------------------------
            validateAccuracy = NeuralUtil.roundToDecimals(100 - (double)badRecognizedCount/(double)validatePatternsCount*100,2);
@@ -249,9 +239,9 @@ public class Train {
            if (validateAccuracy > lowValidError)  {
                saveWeights();
                //minimum epoch count is 20
-               if (licz >10)
+               //if (licz >10)
                 epochStopNr = licz * 2;
-               else epochStopNr = 20;
+              // else epochStopNr = 20;
                time_mid = System.currentTimeMillis();
            }
            lowValidError = Math.max(lowValidError,  validateAccuracy);
@@ -260,10 +250,10 @@ public class Train {
          //-------------------      test       --------------------------
         if (test) {
             for (int i=0; i < testPatternsCount;i++) {
-              setInputLayer(testPatternsNr.get(i), testImages);
-              setOutputLayer(testPatternsNr.get(i), testLabels);
+              NeuralUtil.setInputLayer(InputLayer,testPatternsNr.get(i), testImages);
+              desiredAns = NeuralUtil.setOutputLayer(testPatternsNr.get(i), testLabels);
               neuralNetwork.passForward();
-              badRecognizedCount += validate();
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
              }
             //-----------------classification error-----------------------------
             testAccuracy = NeuralUtil.roundToDecimals(100 -(double)badRecognizedCount/(double)testPatternsCount*100,2);
@@ -273,10 +263,10 @@ public class Train {
         //-------------------      train       --------------------------
         //presenting all patterns one by one
         for (int i=0; i < trainPatternsCount; i++) {
-              setInputLayer(trainPatternsNr.get(i), trainImages);
-              setOutputLayer(trainPatternsNr.get(i), trainLabels);
+              NeuralUtil.setInputLayer(InputLayer,trainPatternsNr.get(i), trainImages);
+              desiredAns = NeuralUtil.setOutputLayer(trainPatternsNr.get(i), trainLabels);
               neuralNetwork.passForward();
-              badRecognizedCount += validate();
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
               double error = neuralNetwork.calculateError(desiredAns);
                 /*------skipping learning for trained patterns------------------------------------*/
                  if (isBackpropSkip) {
@@ -356,42 +346,18 @@ public class Train {
             }
          }
     }
-    private static void setInputLayer(int pattNr,double[][][] images) {
-        int index = 0;
-        int length = images[pattNr].length;
-        for (int k = 0; k < length; k++) {
-            for (int j = 0; j < length; j++) {
-            Neuron neuron = InputLayer.getNeuron(index);
-            neuron.setValue(images[pattNr][k][j]);
-            index++;
-            }
+
+    private static long getSeed() {
+        String wFile = read.getWeightsFileName();
+        long seed;
+        try {
+            seed = Long.parseLong(wFile.substring(wFile.length()-6,wFile.length()-4));
         }
-    }
-    private static void setOutputLayer(int pattNr, double[][] labels) {
-         desiredAns = labels[pattNr];
-    }
-    /*Validate patterns on data set*/
-    private static int validate() {
+        catch (NumberFormatException ex){
+            seed = System.currentTimeMillis();
+        }
+       // System.out.println(seed);
+        return seed;
 
-                
-
-                double max[] = new double[2];
-                double pom = 0;
-
-                 //classification error----------------------------------------
-                 for (int j=0;j<OutputLayer.size();j++) {
-                    Neuron neuron = OutputLayer.getNeuron(j);
-                    max[1] = Math.max(max[1], neuron.getValue());
-                    if (max[1]!=pom) {
-                        max[0] = OutputLayer.indexOf(neuron);
-                        pom = max[1];
-                    }
-                }
-                 //jesli wyjscie odpowiedzi oczekiwanych != 1 czyli cyfra z bazy nie odpowiada
-                 //najwiekszemu wyjsciu to cyfra nie zostala rozpoznana
-                // int digit = 0;
-                 if (desiredAns[(int)max[0]] != 1)
-                    return 1;   //zle rozpoznany
-                 else return 0; //rozpoznany
     }
 }
