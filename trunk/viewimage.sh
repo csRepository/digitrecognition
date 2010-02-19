@@ -1,4 +1,7 @@
 #!/bin/sh
-java -classpath build/classes/ database/MNISTtoPPM  $1 | convert - GIF:image.gif 
-gpicview image.gif
+for i in `seq 1 1 100`;
+do
+printf $i' '
+java -classpath build/classes/ database/MNISTtoPPM $i label #| convert - GIF:image$i.gif 
+done
 

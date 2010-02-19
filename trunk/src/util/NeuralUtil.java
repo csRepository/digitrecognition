@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import neuralnetwork.Layer;
+import neuralnetwork.NeuralNet;
+import neuralnetwork.Neuron;
 
 /**
  * Class that contains methods for handling train and test programs.
@@ -39,6 +42,17 @@ public final class NeuralUtil {
                 System.exit(1);
         }
         return null;
+    }
+
+
+     /*
+     * Set values of bias neurons.
+     */
+    public static void setBiases(NeuralNet net) {
+         for (int i = 0; i < net.getLayers().size()-1; i++) {
+            Layer layer = net.getLayer(i);
+            layer.getNeuron(layer.size()-1).setValue(1);
+        }
     }
 
     /**
@@ -96,6 +110,20 @@ public final class NeuralUtil {
       //  System.out.println(map);
         return tab;
     }
+     public static void setInputLayer(Layer inputLayer, int pattNr,double[][][] images) {
+        int index = 0;
+        int length = images[pattNr].length;
+        for (int k = 0; k < length; k++) {
+            for (int j = 0; j < length; j++) {
+            Neuron neuron = inputLayer.getNeuron(index);
+            neuron.setValue(images[pattNr][k][j]);
+            index++;
+            }
+        }
+    }
+    public static double[] setOutputLayer(int pattNr, double[][] labels) {
+         return labels[pattNr];
+    }
 
      /*
      * Tworzy tabice z numerami wzorcow (jednakowy rozrzut pomiedzy wzorcami)
@@ -107,14 +135,6 @@ public final class NeuralUtil {
                 if (i % (size/patternCount) == 0) array.add(i);
             }
     }
-
-    public static void setValidatePatterns(ArrayList array,int patternCount,int size) {
-        for(int i = 50001; i <= size; i++) {
-               // if (i % (size/patternCount) == 0 && i == 0) array.add(i+1);
-                if (i % (10000/patternCount) == 0) array.add(i);
-            }
-    }
-
         /*
      * Losowanie liczb z zadanego przedzialu [a,b] do tablicy
      */
@@ -180,13 +200,45 @@ public final class NeuralUtil {
      * Dokonuje normalizacji danych do wybranego przedzialu
      */
       private static double normalize(int value,int max,int min,double new_max,double new_min) {
-            double new_value = (double) (value - min) / (max - min) * (new_max - new_min) + new_min;
+            double new_value = (double) (new_max - new_min) * (value - min) / (max - min) + new_min;
             return new_value;
       }
       
-    public static double roundToDecimals(double d, int c) {
+      public static double roundToDecimals(double d, int c) {
         int temp=(int)((d*Math.pow(10,c)));
         return (((double)temp)/Math.pow(10,c));
+      }
+
+      public static int validate(Layer outputLayer, double[] desiredAns) {
+        double max[] = new double[2];
+        double pom = 0;
+
+         //classification error----------------------------------------
+         for (int j=0;j<outputLayer.size();j++) {
+            Neuron neuron = outputLayer.getNeuron(j);
+            max[1] = Math.max(max[1], neuron.getValue());
+            if (max[1]!=pom) {
+                max[0] = outputLayer.indexOf(neuron);
+                pom = max[1];
+            }
+        }
+         //jesli wyjscie odpowiedzi oczekiwanych != 1 czyli cyfra z bazy nie odpowiada
+         //najwiekszemu wyjsciu to cyfra nie zostala rozpoznana
+        // int digit = 0;
+         if (desiredAns[(int)max[0]] != 1)
+            return 1;   //zle rozpoznany
+         else return 0; //rozpoznany
+        //------------------wypisywanie zle rozpoznanych wzorcow
+//             int digit = 0;
+//             if (desiredAns[(int)max[0]]!= 1)
+//             {
+//                 for (int j = 0; j < desiredAns.length; j++) {
+//                     if (desiredAns[j] == 1)  digit = j;
+//                 }
+//                 ++badRecognizedCount;
+////                 System.out.println(badRecognizedCount + ": Digit: " + digit + " Recognized: " +
+////                    + (int)max[0] + " value: " + max[1] + " patternNr:" + patternsNr.get(i) );
+//            }
     }
 
 }

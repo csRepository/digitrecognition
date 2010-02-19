@@ -8,7 +8,7 @@ public class MNISTtoPPM extends Object {
     MNISTImageFile imgF = null;
     MNISTLabelFile lblF = null;
     MNISTDatabase data = new MNISTDatabase();
-    if (args.length!=1) {
+    if (args.length!=2) {
       System.err.println("MNISTtoPPM syntax: MNISTtoPPM  <img offset>");
       System.exit(0);
     } else {
@@ -24,14 +24,16 @@ public class MNISTtoPPM extends Object {
       }
       imgF.setCurr(Integer.parseInt(args[0]));
       lblF.setCurr(Integer.parseInt(args[0]));
-      printPPMToStdOut(imgF, lblF);
-      printLabelToStdErr(lblF);
+      if (  args[1].equals("image"))
+        printPPMToStdOut(imgF, lblF);
+      else
+        printLabelToStdErr(lblF);
     }
   }
 
   public static void printLabelToStdErr(MNISTLabelFile lblF) {
     //Prints to stderr the number that the image is supposed to be 
-    System.err.println("Printing a " + lblF.readData());
+    System.out.println(lblF.readData());
   } 
 
   public static void printPPMToStdOut(MNISTImageFile imgF, MNISTLabelFile lblF) {
