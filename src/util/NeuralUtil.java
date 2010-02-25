@@ -15,12 +15,11 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import neuralnetwork.Layer;
-import neuralnetwork.NeuralNet;
 import neuralnetwork.Neuron;
 
 /**
  * Class that contains methods for handling train and test programs.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public final class NeuralUtil {
   //  private static HashMap map;
@@ -44,16 +43,6 @@ public final class NeuralUtil {
         return null;
     }
 
-
-     /*
-     * Set values of bias neurons.
-     */
-    public static void setBiases(NeuralNet net) {
-         for (int i = 0; i < net.getLayers().size()-1; i++) {
-            Layer layer = net.getLayer(i);
-            layer.getNeuron(layer.size()-1).setValue(1);
-        }
-    }
 
     /**
      * Prepare array for all inputs (3-dimesional array: [nr][array[28][28]])
@@ -241,4 +230,7 @@ public final class NeuralUtil {
 //            }
     }
 
+    public static double calculateClassError(int badRecognizedCount, int patternsCount) {
+        return NeuralUtil.roundToDecimals(100 - badRecognizedCount/(double)patternsCount*100,2);
+    }
 }

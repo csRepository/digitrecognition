@@ -5,67 +5,54 @@ import java.util.Random;
 
 /**
  * Class that implements the neural network.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public class NeuralNet {
 	
-	private ArrayList<Layer> layers;
-        private double mse;
-        private double size;    //wielkosc zbioru wzorcow
+	private static ArrayList<Layer> layers; //layers of Neural Network
+        private double mse;     //Mean Square Error
+        private double size;    //size of learning set
 
-        public NeuralNet(int[] layersSizes) {
-		layers = new ArrayList();
-                for (int i = 0; i < layersSizes.length; i++) {
-                    layers.add(new Layer(layersSizes[i]));
-            }
-	}
+        private NeuralNet() {} //prevents from instantiate class
 
-        public NeuralNet() {
+        /**
+         * Creates feed-forward neural network with all layers and neurons connected.
+         * @param layersSizes array with sizes of layers eg. layersSizes contains {100,30,10}
+         * @return NeuralNet
+         */
+        public static NeuralNet FeedForwardNetwork(int[] layersSizes) {
             layers = new ArrayList();
+            for (int i = 0; i < layersSizes.length; i++) {
+                 layers.add(new Layer(layersSizes[i]));
+            }
+            connectLayers(layersSizes[0], layersSizes[1]-1, 0, 1);
+            connectLayers(layersSizes[1], layersSizes[2], 1, 2);
+            setBiases(1);
+            return new NeuralNet();
         }
 
 	/**
 	 * Adding layer to network
-	 * @param n liczba neuron�w
+	 * @param n count of neurons
 	 */
 	public void addLayer(int n) {
             layers.add(new Layer(n));
 	}
-	public Layer getLayer(int n) {
+        /**
+         * Returns one of layers from Neural Network
+         * @param n number of layer
+         * @return Layer
+         */
+	public  Layer getLayer(int n) {
             return layers.get(n);
 	}
-        public ArrayList getLayers() {
+        /**
+         * Return List of Layer in NeuralNetwork
+         * @return List
+         */
+        public ArrayList<Layer> getLayers() {
             return layers;
         }
-
-        /**
-         * Tworzy po��czenie (synaps�) pomi�dzy dwoma neuronami
-         * @param sourceLayer   numer warstwy, z kt�rej wychodzi po��czenie
-         * @param sourceNeuron  numer neuronu, z kt�rego wychodzi po��czenie
-         * @param destLayer     numer warstwy docelowej po��czenia
-         * @param destNeuron    numer neuronu docelowego
-         */
-	private void connect(int sourceLayer,int sourceNeuron,
-		      int destLayer,int destNeuron)
-	{
-            new Synapse(layers.get(sourceLayer).getNeuron(sourceNeuron),
-              layers.get(destLayer).getNeuron(destNeuron));
-	}
-
-             /**
-     * Tworzy połączenie pomiędzy wszystkimi neuronami dwóch warstw
-     * (łączy warstwy ze sobą)
-     * @param n             liczba neuronow war. 1
-     * @param n1            liczba neuronow war. 2
-     * @param sourceLayer   nazwa warstwy zrodlwoej
-     * @param destLayer     nazwa warstwy docelowej
-     */
-
-    public void connectLayers(int n, int n1,int sourceLayer, int destLayer) {
-        for (int i=0;i<n;i++)
-            for (int j=0;j<n1;j++)
-                connect(sourceLayer, i, destLayer, j);      //polaczenie neuronow
-    }
 
         /**
          * Obliczenie wyjsc neuronow poczynajac od warstwy wejsciowej w
@@ -102,7 +89,7 @@ public class NeuralNet {
                 newError += error*error;
             }
              newError /= 10;
-          
+
              mse += newError ;
              return newError;
         }
@@ -117,7 +104,11 @@ public class NeuralNet {
             mse=0;
             return errorRMS;
         }
-
+        /**
+         * Initialize weights with L.Bottou method to (-a/sqrt(din);a/sqrt(din))
+         * where "din" is count of weights incoming to a node.
+         * @param seed Seed needed to make weights random
+         */
         public void initializeWeights(long seed) {
             Neuron neuron;
             Random random = new Random(seed);
@@ -135,6 +126,10 @@ public class NeuralNet {
 		}
             }
         }
+        /**
+         * Initialize weights to (-a;a)
+         * @param seed Seed needed to make weights random
+         */
         public void initializeWeightsDefault(long seed) {
             Neuron neuron;
             Random random = new Random(seed);
@@ -151,5 +146,41 @@ public class NeuralNet {
 		}
             }
         }
+
+        /**
+         * Tworzy po��czenie (synaps�) pomi�dzy dwoma neuronami
+         * @param sourceLayer   numer warstwy, z kt�rej wychodzi po��czenie
+         * @param sourceNeuron  numer neuronu, z kt�rego wychodzi po��czenie
+         * @param destLayer     numer warstwy docelowej po��czenia
+         * @param destNeuron    numer neuronu docelowego
+         */
+	private static void connect(int sourceLayer,int sourceNeuron,
+		      int destLayer,int destNeuron)
+	{
+            new Synapse(layers.get(sourceLayer).getNeuron(sourceNeuron),
+              layers.get(destLayer).getNeuron(destNeuron));
+	}
+
+         /**
+         * Tworzy połączenie pomiędzy wszystkimi neuronami dwóch warstw
+         * (łączy warstwy ze sobą)
+         * @param n             liczba neuronow war. 1
+         * @param n1            liczba neuronow war. 2
+         * @param sourceLayer   nazwa warstwy zrodlwoej
+         * @param destLayer     nazwa warstwy docelowej
+         */
+        private static void connectLayers(int n, int n1,int sourceLayer, int destLayer) {
+            for (int i=0;i<n;i++)
+                for (int j=0;j<n1;j++)
+                    connect(sourceLayer, i, destLayer, j);      //polaczenie neuronow
+        
+        }
+
+       private static void setBiases(double value) {
+         for (int i = 0; i < layers.size()-1; i++) {
+            Layer layer = layers.get(i);
+            layer.getNeuron(layer.size()-1).setValue(value);
+        }
+    }
 
 }

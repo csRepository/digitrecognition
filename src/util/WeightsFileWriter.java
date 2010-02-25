@@ -7,7 +7,7 @@ import java.io.IOException;
 
 /**
  *
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public final class WeightsFileWriter extends DataOutputStream {
 

@@ -2,7 +2,6 @@ package database;
 
 import java.io.*;
 
-
 public class MNISTtoPPM extends Object {
   public static void main(String [] args ) {
     MNISTImageFile imgF = null;

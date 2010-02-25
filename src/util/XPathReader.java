@@ -1,14 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package util;
 
-/**
- *
- * @author tm
- */
 import java.io.IOException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.*;
@@ -16,6 +7,10 @@ import javax.xml.xpath.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+/**
+ *
+ * @author Glowczynski Tomasz
+ */
 public final class XPathReader {
 
     private String xmlFile;

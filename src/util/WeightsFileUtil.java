@@ -16,8 +16,8 @@ import neuralnetwork.NeuralNet;
 import neuralnetwork.Neuron;
 
 /**
- *
- * @author tm
+ * Tool class for writing and reading weights.
+ * @author Glowczynski Tomasz
  */
 public final class WeightsFileUtil {
 
