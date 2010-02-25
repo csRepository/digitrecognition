@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Implements the Neural Network layer. Each layer contains
  * a list of the neurons.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public class Layer extends ArrayList<Neuron> {
 	

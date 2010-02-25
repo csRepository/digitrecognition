@@ -11,8 +11,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
- *
- * @author tm
+ * 
+ * @author Glowczynski Tomasz
  */
 public final class WeightsFileReader extends DataInputStream {
 

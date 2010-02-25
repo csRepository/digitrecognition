@@ -2,7 +2,7 @@ package neuralnetwork;
 
 /**
  * Makes a connection between two neighbours layers.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public class Synapse {
 
@@ -107,5 +107,12 @@ public class Synapse {
     public void setLearningRate(double learningRate) {
         this.learningRate = learningRate;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+
     
 }

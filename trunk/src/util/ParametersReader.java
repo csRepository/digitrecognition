@@ -10,7 +10,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public final class ParametersReader {
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Neuron: Implementation of a neuron in the Neural Network.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public class Neuron {
 
@@ -45,7 +45,7 @@ public class Neuron {
         }
 
         public  double sigmDerivative(double d) {
-            return d * (1.0 - d);
+            return d * (1.0 - d) ;
 	}
 
         public  double tanhDerivative(double d) {
@@ -92,5 +92,10 @@ public class Neuron {
      */
     public void setValue(double value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 }

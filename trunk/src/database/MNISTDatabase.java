@@ -4,7 +4,6 @@ import java.io.*;
 
 /**
  * Class with methods for handling reading images/labels from MNIST data files.
- * @author tm
  */
 public class MNISTDatabase  {
 
@@ -29,28 +28,28 @@ public class MNISTDatabase  {
 	System.exit(0);
       }
     }
-         public int[][] readImage(String kind,int nr) {
-            MNISTImageFile imgFile = null;
-            if (kind.equals("train"))
-                imgFile = trainImgF;
-             else if (kind.equals("test"))
-                imgFile = testImgF;
-             else {
-                 System.out.println("Brak zbioru " + "'" + kind + "'" + " w bazie");
-                 System.exit(1);
-             }
-            imgFile.setCurr(nr);      //obraz
-            return imgFile.readData();
-        }
-         public int readLabel(String kind,int nr) {
-            MNISTLabelFile lblFile;
-            if (kind.equals("train"))
-                lblFile = trainLblF;
-             else
-                lblFile = testLblF;
-                lblFile.setCurr(nr);      //etykieta
-                return lblFile.readData();
-        }
+     public int[][] readImage(String kind,int nr) {
+        MNISTImageFile imgFile = null;
+        if (kind.equals("train"))
+            imgFile = trainImgF;
+         else if (kind.equals("test"))
+            imgFile = testImgF;
+         else {
+             System.out.println("Brak zbioru " + "'" + kind + "'" + " w bazie");
+             System.exit(1);
+         }
+        imgFile.setCurr(nr);      //obraz
+        return imgFile.readData();
+    }
+     public int readLabel(String kind,int nr) {
+        MNISTLabelFile lblFile;
+        if (kind.equals("train"))
+            lblFile = trainLblF;
+         else
+            lblFile = testLblF;
+            lblFile.setCurr(nr);      //etykieta
+            return lblFile.readData();
+    }
 }
 
 

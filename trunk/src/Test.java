@@ -1,19 +1,14 @@
 import database.MNISTDatabase;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import util.WeightsFileUtil;
 import java.io.IOException;
 import java.util.ArrayList;
-import neuralnetwork.Layer;
-import neuralnetwork.NeuralNet;
-import neuralnetwork.Neuron;
-import neuralnetwork.Synapse;
+import neuralnetwork.*;
 import util.NeuralUtil;
 import util.GPathReader;
 
 /**
  * Main class to test the neural network.
- * @author tm
+ * @author Glowczynski Tomasz
  */
 public class Test {
 
@@ -37,19 +32,15 @@ public class Test {
         nHidd = read.getHiddNeuronsCount()+1;  //l. neuronow + bias
         nOut = 10;
         int net[] = {nIn,nHidd,nOut};
-        neuralNetwork = new NeuralNet(net);                // tworzenie sieci neuronwej
+        neuralNetwork = NeuralNet.FeedForwardNetwork(net);                // tworzenie sieci neuronwej
 
         InputLayer = neuralNetwork.getLayer(0);
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
 
-        NeuralUtil.setBiases(neuralNetwork);
-        //connect layers
-        neuralNetwork.connectLayers(nIn, nHidd-1,0,1);
-        neuralNetwork.connectLayers(nHidd, nOut,1,2);
         //create database 
         dataMNIST = new MNISTDatabase();
        
-       /*-----------------read weights----------------------------------------*/
+       /*-----------------set weights----------------------------------------*/
         String weightsFileName = read.getWeightsFileName();
         double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,weightsFileName);
          int w =- 1;
@@ -64,19 +55,16 @@ public class Test {
                        incSyns.get(k).setValue(weightsArray[++w]);
                 }
          }
-        String algorithm = read.getDefaultAlgorithm();
-        double[] algParam = read.getParameters(algorithm);
-        System.out.println("Data set: " + read.getTestDataSet());
-        System.out.println("Image count: " + read.getTestPatternsCount());
-        System.out.println("Hidden neurons count: " + read.getHiddNeuronsCount());
-        System.out.print("Algorithm type: "+ algorithm + " [");
-        for (int i = 0; i < read.getParameters(algorithm).length; i++) {
-            System.out.print(" " + algParam[i]);
-        }
-        double decay = read.getWeightsDecay();
-        System.out.println(", decay:" + decay + "]\n------");
-       /*-----------------Images preprocess----------------------------------*/
-        System.out.println("Process: Preprocessing images...");
+        /*-----------------parameters from conf. file------------------------*/
+        String dataSet        = read.getTestDataSet();
+        int testPatternsCount = read.getTestPatternsCount();
+        double decay          = read.getWeightsDecay();
+        String algorithm      = read.getDefaultAlgorithm();
+        double[] algParam     = read.getParameters(algorithm);
+
+        util.OutPrinter.printTestHeader(dataSet, algorithm, testPatternsCount,
+                nHidd-1, algParam, decay);
+
         patternsNr = prepareData();
         /*-----------------Digit recogntion----------------------------------*/
         System.out.println("Process: Patterns recognition...");
@@ -93,11 +81,9 @@ public class Test {
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci
-        double accuracy = NeuralUtil.roundToDecimals(100-(double)badRecognizedCount/(double)read.getTestPatternsCount()*100,2);
-        System.out.println("----");
-        System.out.println("Bad recognized images: " + badRecognizedCount
-                + "/" + read.getTestPatternsCount() + " accuracy: "
-                + accuracy + "%");
+        double accuracy = NeuralUtil.calculateClassError(badRecognizedCount,read.getTestPatternsCount());
+
+        util.OutPrinter.printOverallTestResults(testPatternsCount, badRecognizedCount, accuracy);
     }
 
     private  static ArrayList<Integer> prepareData() {

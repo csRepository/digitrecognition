@@ -1,13 +1,11 @@
-import algorithm.Propagation;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import algorithms.AlgorithmsFactory;
+import algorithms.Propagation;
 import java.util.ArrayList;
 import neuralnetwork.*;
 import database.MNISTDatabase;
 import util.WeightsFileUtil;
 import util.NeuralUtil;
 import util.GPathReader;
-import java.lang.reflect.Constructor;
 
 /**
  * Main class to train the neural network.
@@ -48,57 +46,42 @@ public class Train {
         dataMNIST = new MNISTDatabase();
 
         //-----------------parameters from conf. file----------------------------
-        trainPatternsCount = read.getTrainPatternsCount();
-        validatePatternsCount = read.getValidatePatternsCount();
-        testPatternsCount = read.getTestPatternsCount();
-        epochsCount = read.getEpochsCount();
-        method = read.getUpdateMethod();
-        decay = read.getWeightsDecay();
-        rms = read.getRMS();
-        accuracy = read.getAccuracy();
-        isBackpropSkip = read.isBackpropSkip();
-        validate = read.isValidate();
-        test = read.isTest();
-
+        trainPatternsCount     = read.getTrainPatternsCount();
+        validatePatternsCount  = read.getValidatePatternsCount();
+        testPatternsCount      = read.getTestPatternsCount();
+        epochsCount            = read.getEpochsCount();
+        method                 = read.getUpdateMethod();
+        decay                  = read.getWeightsDecay();
+        rms                    = read.getRMS();
+        accuracy               = read.getAccuracy();
+        isBackpropSkip         = read.isBackpropSkip();
+        validate               = read.isValidate();
+        test                   = read.isTest();
+        algorithm              = read.getDefaultAlgorithm();
+        double[] algParam      = read.getParameters(algorithm);
+        String weightsFileName = read.getWeightsFileName();
         // -------------------------------------------------------------------
-        int nIn = 28*28+1;                         //image size + bias
+
+        int nIn   = 28*28+1;                         //image size + bias
         int nHidd = read.getHiddNeuronsCount()+1;  //neurons count + bias
-        int nOut = 10;                             //10 digit classes
+        int nOut  = 10;                             //10 digit classes
         int net[] = {nIn,nHidd,nOut};
-        neuralNetwork = new NeuralNet(net);        // creating neural net
+        neuralNetwork = NeuralNet.FeedForwardNetwork(net);        // creating neural net
       
-        InputLayer = neuralNetwork.getLayer(0);
+        InputLayer  = neuralNetwork.getLayer(0);
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
 
         /*------kopia wag uzywana przy walidacji-------------------*/
-           int weightsCount = nIn * (nHidd - 1) + nHidd * nOut; //wag count
-           weightsCopy = new double[weightsCount];
+        int weightsCount = nIn * (nHidd - 1) + nHidd * nOut; //wag count
+        weightsCopy = new double[weightsCount];
         /*---------------------------------------*/
-        NeuralUtil.setBiases(neuralNetwork);
         
-        /*-------------- connect layers ----------------------------------*/
-        neuralNetwork.connectLayers(nIn, nHidd-1,0,1);
-        neuralNetwork.connectLayers(nHidd, nOut,1,2);
         neuralNetwork.initializeWeights(getSeed());
-        /* ------------- algorithm param ----------------------------------*/
-        algorithm = read.getDefaultAlgorithm();
-        double[] algParam = read.getParameters(algorithm);
+        
         /* -------make instance of algorithm class -------------------------*/
-        try {
-            Class c = Class.forName("algorithm." + algorithm);
-            if (read.getParameters(algorithm) != null) {
-                Constructor constr = c.getConstructor(new Class[] {double[].class}); //constructor with parameters
-                alg = (Propagation) constr.newInstance(new Object[] {algParam});
-            }
-            else {
-                Constructor constr = c.getConstructor(new Class[] {});  //constructor without parameters
-                alg = (Propagation) constr.newInstance(new Object[] {});
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(Train.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Błąd w pliku konfiguracyjnym." + "\n" +
-                               "Dostępne algorytmy: Backpropagation/QuickPropagation/" +
-                               "ResilentPropagation/DeltaBarDelta/SuperSAB ");
+        alg = AlgorithmsFactory.getInstance(algorithm, algParam);
+        if (alg == null) {
+            System.out.println("Algorytm nie został zaimplementowany");
             System.exit(1);
         }
 
@@ -109,17 +92,8 @@ public class Train {
                     alg.initialize(neuralNetwork.getLayer(i).getNeuron(j));
         }
 
-        System.out.println("------\n" + "Data set: " + read.getTrainDataSet());
-        if (validate)
-            System.out.println("Image count: train|validate " + trainPatternsCount + "|" + validatePatternsCount);
-        else System.out.println("Image count: train " + trainPatternsCount);
-        System.out.print("Hidden neurons count: " + read.getHiddNeuronsCount()  +
-            "\nAlgorithm type: "+ algorithm + " [");
-        for (int i = 0; i < read.getParameters(algorithm).length; i++) {
-            System.out.print(" " + algParam[i]);
-        }
-        System.out.println(", decay:" + decay + "]\n------" + "\n" +
-              "Process: Preprocessing images...");
+         util.OutPrinter.printTrainHeader(read.getTrainDataSet(), validate, algorithm,
+               trainPatternsCount, validatePatternsCount, nHidd, algParam, decay);
 
          /*-----------------Images preprocess----------------------------------*/
         prepareData("train", trainPatternsCount);
@@ -127,47 +101,44 @@ public class Train {
         if (test)  prepareData("test", testPatternsCount);
 
         /*-----------------Neural Networks learning---------------------------*/
-         System.out.println("Process: Neural Network learning...\n" +
-                 "Epoch |    RMS     | Accuracy(train validate test)");
+         util.OutPrinter.printTrainLearning();
+
          time_start = System.currentTimeMillis();
-         //epoch && error
-         if ((epochsCount != 0) && (rms != 0)) do learn();
-             while ((actualRMS >= rms) && (licz < epochsCount));
-         //epoch && accuracy
-         else if ((epochsCount != 0) && (accuracy != 0)) do learn();
-             while ((trainAccuracy < accuracy) && (licz < epochsCount));
-         //epoch && valdiation
-         else if (epochsCount!=0 && validate) do learn();              
-             while (licz < epochsCount && (licz < epochStopNr || licz < 20));
-         // epoch 
-         else if (epochsCount!=0) do learn();
-             while (licz < epochsCount);
-         // error 
-         else if (rms!=0) do learn();
-             while (actualRMS >= rms);
-         //accuracy
-         else if (accuracy!=0) do learn();
-             while (trainAccuracy < accuracy );
+
+         int caseNr =
+             (epochsCount != 0) && (rms != 0)       ? 1 :
+             (epochsCount != 0) && (accuracy != 0)  ? 2 :
+             (epochsCount!=0 && validate)           ? 3 :
+             epochsCount!=0                         ? 4 :
+             rms!=0                                 ? 5 :
+             accuracy!=0                            ? 6 :
+             0;
+
+         switch (caseNr) {
+             //epoch && rms
+             case 1: do learn() ; while ((actualRMS >= rms) && (licz < epochsCount)); break;
+             //epoch && accuracy
+             case 2: do learn() ; while ((trainAccuracy < accuracy) && (licz < epochsCount)); break;
+             //epoch && valdiation
+             case 3: do learn() ; while ((licz < epochsCount) && (licz < epochStopNr || licz < 20)); break;
+             // epoch
+             case 4: do learn() ; while (licz < epochsCount); break;
+             // error
+             case 5: do learn() ; while (actualRMS >= rms); break;
+             //accuracy
+             case 6: do learn() ; while (trainAccuracy < accuracy ); break;
+             default: break;
+         }
 
          time_end = System.currentTimeMillis();
 
           long time = time_end - time_start;
           long mid_time = time_mid - time_start;
-         // if (time<60000)
-        if (validate) {
-            System.out.printf("\nBest validation accuracy: %.2f%% \nEpochs: %d\n", lowValidError, epochStopNr/2);
-            System.out.println("Learning time: " + NeuralUtil.roundToDecimals((double)mid_time/1000,0) + " sek," +
-                " Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
-        }
-        else {
-            System.out.printf("\nValidation accuracy: %.2f%% \nEpochs: %d\n", trainAccuracy, licz);
-            System.out.println("Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
-        }
-             // System.out.println(NeuralUtil.roundToDecimals((double)time/60000,2)+" min");
-        /*--------------------------------------------------------------------*/
+
+          util.OutPrinter.printEpochResults(validate, lowValidError, epochStopNr,
+                  mid_time, time, trainAccuracy, licz);
 
          //write weights to file
-         String weightsFileName = read.getWeightsFileName();
          if (validate)
             WeightsFileUtil.writeWeights(weightsCopy, weightsFileName);
          else  WeightsFileUtil.writeWeights(neuralNetwork, weightsFileName);
@@ -220,7 +191,7 @@ public class Train {
         licz++;
         if (method.equals("online"))
             NeuralUtil.randomizePatterns(trainPatternsNr); //przemieszanie kolejnosci wzorcow
-      
+
         int badRecognizedCount = 0;
 
         //-------------------     validate       --------------------------
@@ -232,7 +203,7 @@ public class Train {
               badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
            }
            //-----------------blad klasyfikacji-----------------------------
-           validateAccuracy = NeuralUtil.roundToDecimals(100 - (double)badRecognizedCount/(double)validatePatternsCount*100,2);
+           validateAccuracy = NeuralUtil.calculateClassError(badRecognizedCount,validatePatternsCount);
            badRecognizedCount = 0;
 
            //if actual accuracy is higher than earlier save weights
@@ -256,7 +227,8 @@ public class Train {
               badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
              }
             //-----------------classification error-----------------------------
-            testAccuracy = NeuralUtil.roundToDecimals(100 -(double)badRecognizedCount/(double)testPatternsCount*100,2);
+           
+            testAccuracy = NeuralUtil.calculateClassError(badRecognizedCount,testPatternsCount);
             badRecognizedCount = 0;
         }
 
@@ -281,20 +253,15 @@ public class Train {
                  }
          }
         //-----------------classification error------------------------------------
-        trainAccuracy = NeuralUtil.roundToDecimals(100-(double)badRecognizedCount/(double)trainPatternsCount*100,2);
+        trainAccuracy = NeuralUtil.calculateClassError(badRecognizedCount,trainPatternsCount);
          //---------------------------------------------------------------------
 
         //lastError = rms;
          actualRMS = neuralNetwork.calculateRMS();
         
-         if (test && validate)
-             System.out.printf("%d %.15f %.2f%% %.2f%% %.2f%%\n", licz, actualRMS, trainAccuracy, validateAccuracy, testAccuracy);
-         else if (validate)
-             System.out.printf("%d %.15f %.2f%% %.2f%%\n", licz, actualRMS, trainAccuracy, validateAccuracy);
-         else if (test) 
-             System.out.printf("%d %.15f %.2f%% %.2f%% \n", licz, actualRMS, trainAccuracy, testAccuracy);
-         else
-             System.out.printf("%d %.15f %.2f%%\n", licz, actualRMS, trainAccuracy);
+         util.OutPrinter.printOverallTrainResults(test, validate, trainAccuracy,
+                 testAccuracy, validateAccuracy, licz, actualRMS);
+
          if (method.equals("batch"))
             changeWeights();
     }
