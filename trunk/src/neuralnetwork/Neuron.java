@@ -44,8 +44,8 @@ public class Neuron {
             return 1.0 / (1 + Math.exp(-1.0 * u));
         }
 
-        public  double sigmDerivative(double d) {
-            return d * (1.0 - d) ;
+        public  double sigmDerivative(double d, double primeTerm) {
+            return d * (1.0 - d) + primeTerm;
 	}
 
         public  double tanhDerivative(double d) {

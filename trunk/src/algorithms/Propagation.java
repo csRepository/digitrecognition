@@ -15,13 +15,13 @@ import neuralnetwork.Synapse;
  */
 public abstract class Propagation {
 
-    public void calcOutDelta(Neuron neuron, double d) {
+    public void calcOutDelta(Neuron neuron, double d, double primeTerm) {
             double value = neuron.getValue();
             double error = d - value;
-            neuron.setDelta(-(error) * neuron.sigmDerivative(value));
+            neuron.setDelta(-(error) * neuron.sigmDerivative(value,primeTerm));
     }
 
-    public void calcHiddDelta(Neuron neuron) {
+    public void calcHiddDelta(Neuron neuron, double primeTerm) {
             double sumErr = 0;
             double value = neuron.getValue();
             ArrayList<Synapse> outSynapses = neuron.getOutgoingSyn();
@@ -29,7 +29,7 @@ public abstract class Propagation {
                 Synapse syn =  outSynapses.get(i);
                 sumErr += syn.getToNeuron().getDelta() * syn.getValue(); //delta_neuronu_warstwy_wyj * waga
             }
-           neuron.setDelta(sumErr * neuron.sigmDerivative(value));
+           neuron.setDelta(sumErr * neuron.sigmDerivative(value,primeTerm));
     }
    /**
      * Calculate gradient
