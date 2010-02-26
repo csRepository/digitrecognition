@@ -12,17 +12,20 @@ package util;
 public class OutPrinter {
 
     public static void printTrainHeader(String dataSet, boolean validate, String algorithm,
-            int trainCount, int validCount, int hiddCount, double[] parameters, double decay) {
+            int trainCount, int validCount, int hiddCount, double[] parameters,
+            double decay, String method, double range_min, double range_max) {
 
         System.out.println("------\n" + "Data set: " + dataSet);
         String val = validate ? "Image count: train|validate " + trainCount + "|" + validCount:
             "Image count: train " + trainCount;
-        System.out.print(val + "\nHidden neurons count: " + (hiddCount-1)  +
+        System.out.println(val + "\nPreprocess method: " + method + ", Range: " +
+                "[" + range_min + ";" + range_max + "]");
+        System.out.print("Hidden neurons count: " + (hiddCount-1)  +
             "\nAlgorithm type: "+ algorithm + " [");
         for (int i = 0; i < parameters.length; i++) {
             System.out.print(" " + parameters[i]);
         }
-        System.out.println(", decay:" + decay + "]\n------" + "\n" +
+        System.out.println(", decay:" + decay + " ]\n------" + "\n" +
               "Process: Preprocessing images...");
     }
     public static void printTrainLearning() {
@@ -59,16 +62,19 @@ public class OutPrinter {
     }
 
     public static void printTestHeader(String dataSet, String algorithm,
-            int testCount, int hiddCount, double[] parameters, double decay) {
+            int testCount, int hiddCount, double[] parameters, double decay,
+            String method, double range_min, double range_max) {
 
         System.out.println("Data set: " + dataSet);
         System.out.println("Image count: " + testCount);
+        System.out.println("Preprocess method: " + method + ", Range: " +
+                "[" + range_min + ";" + range_max + "]");
         System.out.println("Hidden neurons count: " + hiddCount);
         System.out.print("Algorithm type: "+ algorithm + " [");
         for (int i = 0; i < parameters.length; i++) {
             System.out.print(" " + parameters[i]);
         }
-        System.out.println(", decay:" + decay + "]\n------");
+        System.out.println(", decay:" + decay + " ]\n------");
        /*-----------------Images preprocess----------------------------------*/
         System.out.println("Process: Preprocessing images...");
     }

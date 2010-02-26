@@ -61,9 +61,12 @@ public class Test {
         double decay          = read.getWeightsDecay();
         String algorithm      = read.getDefaultAlgorithm();
         double[] algParam     = read.getParameters(algorithm);
+        String method         = read.getPreprocessMethod();
+        double range_min      = read.getRangeMin();
+        double range_max      = read.getRangeMax();
 
         util.OutPrinter.printTestHeader(dataSet, algorithm, testPatternsCount,
-                nHidd-1, algParam, decay);
+                nHidd-1, algParam, decay, method, range_min, range_max);
 
         patternsNr = prepareData();
         /*-----------------Digit recogntion----------------------------------*/
@@ -88,8 +91,12 @@ public class Test {
 
     private  static ArrayList<Integer> prepareData() {
         ArrayList<Integer> testArray = new ArrayList();
+        double min = read.getRangeMin();
+        double max = read.getRangeMax();
+        String dataSet = read.getTestDataSet();
+        String preprocesMethod = read.getPreprocessMethod();
         NeuralUtil.setPatterns(testArray,read.getTestPatternsCount(),1,10000); //wybor wzorcow z bazy wz. uczacych
-        images = NeuralUtil.prepareInputSet(testArray, dataMNIST, read.getTestDataSet(), read.getPreprocessMethod());
+        images = NeuralUtil.prepareInputSet(testArray, dataMNIST, dataSet, preprocesMethod, min, max);
         labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, read.getTestDataSet());
         return testArray ;
     }

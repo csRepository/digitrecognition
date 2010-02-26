@@ -10,8 +10,8 @@ import java.util.Random;
 public class NeuralNet {
 	
 	private static ArrayList<Layer> layers; //layers of Neural Network
-        private double mse;     //Mean Square Error
-        private double size;    //size of learning set
+        private static double mse;     //Mean Square Error
+        private static double size;    //size of learning set
 
         private NeuralNet() {} //prevents from instantiate class
 

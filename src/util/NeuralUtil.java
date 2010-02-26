@@ -37,7 +37,7 @@ public final class NeuralUtil {
         }
         else {
                 System.err.println("Brak parametru z plikiem konfiguracyjnym" +
-                                    " np. java Train \"parameters.xml\" ");
+                                    " np. java -jar Train \"parameters.xml\" ");
                 System.exit(1);
         }
         return null;
@@ -51,13 +51,14 @@ public final class NeuralUtil {
      * @param method    data preprocess method (Method must be defined in NeuralUtil class)
      * @return
      */
-    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data, String dataType, String methodName) {
+    public static double[][][] prepareInputSet(ArrayList<Integer> array, MNISTDatabase data,
+            String dataType, String methodName, double min, double max) {
         double[][][] tab = new double[array.size()][][];
         for (int i = 0; i < array.size(); i++) {
-            Object[] methodParam =  new Object[] {getImage(array.get(i), data, dataType)};
+            Object[] methodParam =  new Object[] {getImage(array.get(i), data, dataType),min,max};
             Method method = null;
             try {
-                method = NeuralUtil.class.getDeclaredMethod(methodName, new Class[]{int[][].class});
+                method = NeuralUtil.class.getDeclaredMethod(methodName, new Class[]{int[][].class, double.class, double.class});
             } catch (NoSuchMethodException ex) {
                 Logger.getLogger(NeuralUtil.class.getName()).log(Level.SEVERE, null, ex);
             } catch (SecurityException ex) {
@@ -153,7 +154,7 @@ public final class NeuralUtil {
     /*
      * Binaryzacja danych
      */
-    private static double[][] binarize(int[][] data) {
+    private static double[][] binarize(int[][] data, double min, double max) {
         int suma = 0;
         for (int j = 0; j<data.length; j++) {
             for (int k = 0; k < data.length; k++) {
@@ -165,21 +166,78 @@ public final class NeuralUtil {
         double data1[][] = new double[data.length][data.length];
         for (int j = 0; j < data.length; j++) {
             for (int k = 0; k < data.length; k++) {
-                if (data[j][k] >= srednia) data1[j][k] = 1;
-                else  data1[j][k] = 0;
+                if (data[j][k] >= srednia) data1[j][k] = max;
+                else  data1[j][k] = min;
             }
         }
         return data1;
     }
+
+    private static double[][] OtsuTreshold(int[][] data, double min, double max) {
+        // Calculate histogram
+        int[] histData = new int[256];
+         for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+               int h = data[i][j];
+          //  System.out.print(h);
+           histData[h] ++;
+            }
+        }
+        // Total number of pixels
+        int total = data.length * data.length;
+
+        float sum = 0;
+        for (int t=0 ; t<256 ; t++) sum += t * histData[t];
+
+        float sumB = 0;
+        int wB = 0;
+        int wF = 0;
+
+        float varMax = 0;
+        int threshold = 0;
+
+        for (int t=0 ; t<256 ; t++) {
+           wB += histData[t];               // Weight Background
+           if (wB == 0) continue;
+
+           wF = total - wB;                 // Weight Foreground
+           if (wF == 0) break;
+
+           sumB += (float) (t * histData[t]);
+
+           float mB = sumB / wB;            // Mean Background
+           float mF = (sum - sumB) / wF;    // Mean Foreground
+
+           // Calculate Between Class Variance
+           float varBetween = (float) (wB * wF) * (mB - mF) * (mB - mF);
+
+           // Check if new maximum found
+           if (varBetween > varMax) {
+              varMax = varBetween;
+              threshold = t;
+           }
+        }
+
+        // Apply threshold to create binary image
+        double[][] outData = new double[data.length][data.length];
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+               outData[i][j] = (data[i][j] >= threshold) ?  max : min;
+            }
+        }
+        return outData;
+
+    }
+    
     /*
      * Skalowanie calej tablicy z przedzialem wartosci od - do do
      * nowej tablicy nowym przedziale wartosci od - do
      */
-      private static double[][] scale(int[][] data) {
+      private static double[][] scale(int[][] data, double min,  double max) {
         double data1[][] = new double[data.length][data.length];
         for (int j = 0; j < data.length; j++) {
             for (int k = 0; k < data.length; k++) {
-               data1[j][k] = normalize(data[j][k], 255, 0, 1, 0);
+               data1[j][k] = normalize(data[j][k], 255, 0, max, min);
             }
         }
         return data1;

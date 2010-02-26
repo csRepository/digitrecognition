@@ -38,6 +38,7 @@ public class Train {
     private static String method;           //określa sposob zmiany wag
     private static double rms;
     private static boolean isBackpropSkip, validate, test;
+    private static double primeTerm;
 
 
     public static void main(String[] args)  {
@@ -58,6 +59,7 @@ public class Train {
         validate               = read.isValidate();
         test                   = read.isTest();
         algorithm              = read.getDefaultAlgorithm();
+        primeTerm              = read.getSigmoidPrimeTerm();
         double[] algParam      = read.getParameters(algorithm);
         String weightsFileName = read.getWeightsFileName();
         // -------------------------------------------------------------------
@@ -93,7 +95,8 @@ public class Train {
         }
 
          util.OutPrinter.printTrainHeader(read.getTrainDataSet(), validate, algorithm,
-               trainPatternsCount, validatePatternsCount, nHidd, algParam, decay);
+               trainPatternsCount, validatePatternsCount, nHidd, algParam, decay,
+               read.getPreprocessMethod(), read.getRangeMin(), read.getRangeMax());
 
          /*-----------------Images preprocess----------------------------------*/
         prepareData("train", trainPatternsCount);
@@ -108,10 +111,10 @@ public class Train {
          int caseNr =
              (epochsCount != 0) && (rms != 0)       ? 1 :
              (epochsCount != 0) && (accuracy != 0)  ? 2 :
-             (epochsCount!=0 && validate)           ? 3 :
-             epochsCount!=0                         ? 4 :
-             rms!=0                                 ? 5 :
-             accuracy!=0                            ? 6 :
+             (epochsCount != 0) && validate         ? 3 :
+             epochsCount  != 0                      ? 4 :
+             rms != 0                               ? 5 :
+             accuracy != 0                          ? 6 :
              0;
 
          switch (caseNr) {
@@ -151,6 +154,8 @@ public class Train {
         ArrayList<Integer> pattNrs = new ArrayList();
         String dataSet = read.getTrainDataSet();
         String preprocesMethod = read.getPreprocessMethod();
+        double min = read.getRangeMin();
+        double max = read.getRangeMax();
         
         int startPattern = 1;
         int endPattern = 60000;
@@ -164,7 +169,7 @@ public class Train {
         else startPattern = 50001;
         NeuralUtil.setPatterns(trainArray,patternsCount,startPattern, endPattern); //wybor wzorcow z bazy wz. uczacych
    
-        images = NeuralUtil.prepareInputSet(trainArray, dataMNIST, dataSet, preprocesMethod);
+        images = NeuralUtil.prepareInputSet(trainArray, dataMNIST, dataSet, preprocesMethod, min, max);
         labels = NeuralUtil.prepareOutputSet(trainArray, OutputLayer.size(), dataMNIST, dataSet);
         
         for (int i = 0; i < patternsCount; i++)
@@ -276,10 +281,10 @@ public class Train {
             for (int j = 0; j < layer.size(); j++) {
                 Neuron neuron = layer.getNeuron(j);
                 if (i == layersSize-1) {
-                     alg.calcOutDelta(neuron, desiredAns[j]);
+                     alg.calcOutDelta(neuron, desiredAns[j],primeTerm);
                      alg.calcUpdate(neuron, decay);
                 } else {
-                     alg.calcHiddDelta(neuron);
+                     alg.calcHiddDelta(neuron,primeTerm);
                      alg.calcUpdate(neuron, decay);
                 }
             }
