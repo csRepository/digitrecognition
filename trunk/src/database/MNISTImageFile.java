@@ -3,11 +3,13 @@ package database;
 import java.io.*;
 
 public class MNISTImageFile extends RandomAccessFile {
-  public int count;
-  public int rows;
-  public int cols;
-  public int curr;
-  public String fn;
+
+  private int count;
+  private int rows;
+  private int cols;
+  private int curr;
+  private String fn;
+
   public MNISTImageFile(String fn, String mode) throws IOException, FileNotFoundException {
     super(fn,mode);
     this.fn = fn;

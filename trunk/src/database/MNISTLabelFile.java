@@ -3,11 +3,10 @@ package database;
 import java.io.*;
 
 public class MNISTLabelFile extends RandomAccessFile {
-  public int count;
-  public int rows;
-  public int cols;
-  public int curr;
-  public String fileName;
+  private int count;
+  private int curr;
+  private String fileName;
+
   public MNISTLabelFile(String fileName, String mode) throws IOException, FileNotFoundException {
     super(fileName,mode);
     this.fileName = fileName;

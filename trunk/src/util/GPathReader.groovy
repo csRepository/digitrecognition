@@ -1,87 +1,163 @@
 
 package util
+import org.xml.sax.SAXException
 /**
  *
  * @author Glowczynski Tomasz
  */
 class GPathReader {
 
-    def network
+    private static network
+    private static int epochsCount
+    private static int hiddenNeuronsCount
+    private static double accuracy; //parameter z pliku
+    private static int trainPatternsCount,validPatternsCount,testPatternsCount;
+    private static boolean backpropSkip, validate, test;
+    private static String trainDataSet, testDataSet, validDataSet
+    private static String preprocessMethod
+    private static double decayValue
+    private static double rmsValue
+    private static double accuracyValue
+    private static String algorithmType
+    private static String updateMethodType
+    private static double[] algParameters
+    private static String weightsFileName
+    private static double sigmoidPrimeTerm
+    private static double rangeMin
+    private static double rangeMax
 
-    GPathReader(file) {
-        this.network = new XmlSlurper().parse(file)
+    private GPathReader() {}
+    
+    public static setParametersFile(String file) {
+        try {
+            network = new XmlSlurper().parse(file)
+            readParametersFromFile()
+        }
+        catch (SAXException ex) {
+            System.err.println("Error parsing " + file);
+        }
     }
 
-    int getHiddNeuronsCount() {
-        def count = network.parameters.hidden.toInteger()
+    private static void readParametersFromFile() {
+        trainPatternsCount = network.parameters.patterns.train.@count.toInteger()
+        testPatternsCount  = network.parameters.patterns.test.@count.toInteger()
+        validPatternsCount = network.parameters.patterns.valid.@count.toInteger()
+        hiddenNeuronsCount = network.parameters.hidden.toInteger()
+        trainDataSet       = network.parameters.patterns.train.@set.text().trim()
+        testDataSet        = network.parameters.patterns.test.@set.text().trim()
+        validDataSet       = network.parameters.patterns.valid.@set.text().trim()
+        preprocessMethod   = network.parameters.patterns.preprocess.@method.text().trim()
+        rangeMin           = network.parameters.patterns.preprocess.@min.toDouble()
+        rangeMax           = network.parameters.patterns.preprocess.@max.toDouble()
+        rmsValue           = network.parameters.error.toDouble()
+        epochsCount        = network.parameters.epochs.toInteger()
+        accuracy           = network.parameters.accuracy.toDouble()
+        algorithmType      = network.parameters.algorithm.type.text().trim()
+        updateMethodType   = network.parameters.algorithm.update_method.text().trim()
+        backpropSkip       = network.parameters.algorithm.backprop_skip.toBoolean()
+        decayValue         = network.parameters.algorithm.weights_decay.toDouble()
+        sigmoidPrimeTerm   = network.parameters.algorithm.sgm_prime_term.toDouble()
+        weightsFileName    = network.parameters.weights_file.text().trim()
+        validate           = network.parameters.validate.toBoolean()
+        test               = network.parameters.test.toBoolean()
+        algParameters      = getParameters(algorithmType)
     }
-//-------------------------<patterns>-------------------------------------------
-    int getTrainPatternsCount() {
-        def count = network.parameters.patterns.train.@count.toInteger()
-    }
-    int getTestPatternsCount() {
-        def count = network.parameters.patterns.test.@count.toInteger()
-    }
-    int getValidatePatternsCount() {
-        def count = network.parameters.patterns.valid.@count.toInteger()
-    }
-    String getTrainDataSet() {
-        def set = network.parameters.patterns.train.@set.text().trim()
-    }
-    String getTestDataSet() {
-        def set = network.parameters.patterns.test.@set.text().trim()
-    }
-    String getValidateDataSet() {
-        def set = network.parameters.patterns.valid.@set.text().trim()
-    }
-    String getPreprocessMethod() {
-        def method = network.parameters.patterns.preprocess.@method.text().trim()
-    }
-    double getRangeMin() {
-        def min = network.parameters.patterns.preprocess.@min.toDouble()
-    }
-    double getRangeMax() {
-        def max = network.parameters.patterns.preprocess.@max.toDouble()
-    }
-//----------------------------------------------------------------------------
-    double getRMS() {
-        def rms = network.parameters.error.toDouble()
-    }
-    int getEpochsCount() {
-        def count = network.parameters.epochs.toInteger()
-    }
-    double getAccuracy() {
-        def accuracy = network.parameters.accuracy.toDouble()
-    }
-//---------------------------Algorithm----------------------------------------
-    String getDefaultAlgorithm() {
-        def algorithm = network.parameters.algorithm.type.text().trim()
-    }
-    String getUpdateMethod() {
-        def method = network.parameters.algorithm.update_method.text().trim()
-    }
-    boolean isBackpropSkip() {
-        def is = network.parameters.algorithm.backprop_skip.toBoolean()
-    }
-    double getWeightsDecay() {
-        def decay = network.parameters.algorithm.weights_decay.toDouble()
-    }
-    double getSigmoidPrimeTerm() {
-        def decay = network.parameters.algorithm.sgm_prime_term.toDouble()
-    }
-//------------------------------------------------------------------------------
-    String getWeightsFileName() {
-        def method = network.parameters.weights_file.text().trim()
-    }
-    boolean isValidate() {
-        def is = network.parameters.validate.toBoolean()
-    }
-    boolean isTest() {
-        def is = network.parameters.test.toBoolean()
-    }
-    double[] getParameters(String name) {
+
+    private static double[] getParameters(String name) {
         def parameters = network.algorithm.find { it.name == name}.parameter
         parameters.collect {it.toDouble()}
+    }
+
+    public static double getAccuracy() {
+        return accuracy;
+    }
+
+    public static double getAccuracyValue() {
+        return accuracyValue;
+    }
+
+    public static double[] getAlgParameters() {
+        return algParameters;
+    }
+
+    public static String getAlgorithmType() {
+        return algorithmType;
+    }
+
+    public static double getDecayValue() {
+        return decayValue;
+    }
+
+    public static int getEpochsCount() {
+        return epochsCount;
+    }
+
+    public static int getHiddenNeuronsCount() {
+        return hiddenNeuronsCount;
+    }
+
+    public static boolean isBackpropSkip() {
+        return backpropSkip;
+    }
+
+    public static boolean isTest() {
+        return test;
+    }
+
+    public static boolean isValidate() {
+        return validate;
+    }
+
+    public static String getPreprocessMethod() {
+        return preprocessMethod;
+    }
+
+    public static double getRangeMax() {
+        return rangeMax;
+    }
+
+    public static double getRangeMin() {
+        return rangeMin;
+    }
+
+    public static double getRmsValue() {
+        return rmsValue;
+    }
+
+    public static double getSigmoidPrimeTerm() {
+        return sigmoidPrimeTerm;
+    }
+
+    public static String getTestDataSet() {
+        return testDataSet;
+    }
+
+    public static int getTestPatternsCount() {
+        return testPatternsCount;
+    }
+
+    public static String getTrainDataSet() {
+        return trainDataSet;
+    }
+
+    public static int getTrainPatternsCount() {
+        return trainPatternsCount;
+    }
+
+    public static String getUpdateMethodType() {
+        return updateMethodType;
+    }
+
+    public static String getValidDataSet() {
+        return validDataSet;
+    }
+
+    public static int getValidPatternsCount() {
+        return validPatternsCount;
+    }
+
+    public static String getWeightsFileName() {
+        return weightsFileName;
     }
 }
 

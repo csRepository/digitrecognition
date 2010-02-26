@@ -13,21 +13,27 @@ public class MNISTDatabase  {
     public String trainLblFPath = "digitDatabase/train-labels-idx1-ubyte";
     public String testImgFPath = "digitDatabase/t10k-images-idx3-ubyte";
     public String testLblFPath = "digitDatabase/t10k-labels-idx1-ubyte";
-  
-  public MNISTDatabase() {  
+
+  private static final MNISTDatabase INSTANCE = new MNISTDatabase();
+
+  private MNISTDatabase() {
       try {
 	trainImgF = new MNISTImageFile(trainImgFPath,"r");
 	trainLblF = new MNISTLabelFile(trainLblFPath,"r");
         testImgF = new MNISTImageFile(testImgFPath,"r");
 	testLblF = new MNISTLabelFile(testLblFPath,"r");
       } catch (FileNotFoundException e) { 
-	System.err.println("File not found: " + e);
-	System.exit(0);
+            System.err.println("File not found: " + e);
+            System.exit(0);
       } catch (IOException e) {
-	System.err.println("IO Exception: " + e);
-	System.exit(0);
+            System.err.println("IO Exception: " + e);
+            System.exit(0);
       }
     }
+
+  public static MNISTDatabase getInstance() {
+      return INSTANCE;
+  }
      public int[][] readImage(String kind,int nr) {
         MNISTImageFile imgFile = null;
         if (kind.equals("train"))
