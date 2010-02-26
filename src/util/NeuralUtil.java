@@ -21,19 +21,21 @@ import neuralnetwork.Neuron;
  * Class that contains methods for handling train and test programs.
  * @author Glowczynski Tomasz
  */
-public final class NeuralUtil {
+public class NeuralUtil {
   //  private static HashMap map;
     /*
      * Wczytuje plik konfiguracyjny z parametrami sieci
      */
+
     public static GPathReader readConfigFile(String[] args) {
                 if (args.length > 0) {
                 File file = new File(args[0]);
                 if (!file.exists()) {
                      System.err.println("Brak pliku konfiguracyjnego");
                      System.exit(1);
-                } else
-                  return  new GPathReader(args[0]);
+                } else {
+                    GPathReader.setParametersFile(args[0]);
+                }
         }
         else {
                 System.err.println("Brak parametru z plikiem konfiguracyjnym" +

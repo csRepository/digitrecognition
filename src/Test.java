@@ -16,20 +16,17 @@ public class Test {
     private static Layer InputLayer;	// warstwa wejsciowa
     private static int nIn,nHidd,nOut;      //liczba neuronow wej.,ukryt.,wyj.
     private static NeuralNet neuralNetwork;
-    private static MNISTDatabase dataMNIST;
     private static double[][][] images;
     private static double[][] labels;
     private static ArrayList<Integer> patternsNr;
     private static double [] desiredAns;       //oczekiwane odpowiedzi sieci
-    //private static ParametersReader parametersFile;
-    private static GPathReader read;
+    //private static ParametersGPathReaderer parametersFile;
 
     public static void main(String[] args) throws IOException {
-
-        read = new GPathReader(args[0]);
-
+   
+        NeuralUtil.readConfigFile(args);
         nIn = 28*28+1; //wielkosc obrazu + bias
-        nHidd = read.getHiddNeuronsCount()+1;  //l. neuronow + bias
+        nHidd = GPathReader.getHiddenNeuronsCount() + 1;  //l. neuronow + bias
         nOut = 10;
         int net[] = {nIn,nHidd,nOut};
         neuralNetwork = NeuralNet.FeedForwardNetwork(net);                // tworzenie sieci neuronwej
@@ -37,11 +34,8 @@ public class Test {
         InputLayer = neuralNetwork.getLayer(0);
         OutputLayer = neuralNetwork.getLayer(neuralNetwork.getLayers().size()-1);
 
-        //create database 
-        dataMNIST = new MNISTDatabase();
-       
        /*-----------------set weights----------------------------------------*/
-        String weightsFileName = read.getWeightsFileName();
+        String weightsFileName = GPathReader.getWeightsFileName();
         double weightsArray[] = WeightsFileUtil.readWeights(neuralNetwork,weightsFileName);
          int w =- 1;
          int layersSize = neuralNetwork.getLayers().size();
@@ -55,18 +49,7 @@ public class Test {
                        incSyns.get(k).setValue(weightsArray[++w]);
                 }
          }
-        /*-----------------parameters from conf. file------------------------*/
-        String dataSet        = read.getTestDataSet();
-        int testPatternsCount = read.getTestPatternsCount();
-        double decay          = read.getWeightsDecay();
-        String algorithm      = read.getDefaultAlgorithm();
-        double[] algParam     = read.getParameters(algorithm);
-        String method         = read.getPreprocessMethod();
-        double range_min      = read.getRangeMin();
-        double range_max      = read.getRangeMax();
-
-        util.OutPrinter.printTestHeader(dataSet, algorithm, testPatternsCount,
-                nHidd-1, algParam, decay, method, range_min, range_max);
+        util.OutPrinter.printTestHeader();
 
         patternsNr = prepareData();
         /*-----------------Digit recogntion----------------------------------*/
@@ -84,20 +67,20 @@ public class Test {
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci
-        double accuracy = NeuralUtil.calculateClassError(badRecognizedCount,read.getTestPatternsCount());
-
-        util.OutPrinter.printOverallTestResults(testPatternsCount, badRecognizedCount, accuracy);
+        double accuracy = NeuralUtil.calculateClassError(badRecognizedCount,GPathReader.getTestPatternsCount());
+        util.OutPrinter.printOverallTestResults(badRecognizedCount, accuracy);
     }
 
     private  static ArrayList<Integer> prepareData() {
+        MNISTDatabase dataMNIST = MNISTDatabase.getInstance();
         ArrayList<Integer> testArray = new ArrayList();
-        double min = read.getRangeMin();
-        double max = read.getRangeMax();
-        String dataSet = read.getTestDataSet();
-        String preprocesMethod = read.getPreprocessMethod();
-        NeuralUtil.setPatterns(testArray,read.getTestPatternsCount(),1,10000); //wybor wzorcow z bazy wz. uczacych
+        double min = GPathReader.getRangeMin();
+        double max = GPathReader.getRangeMax();
+        String dataSet = GPathReader.getTestDataSet();
+        String preprocesMethod = GPathReader.getPreprocessMethod();
+        NeuralUtil.setPatterns(testArray,GPathReader.getTestPatternsCount(),1,10000); //wybor wzorcow z bazy wz. uczacych
         images = NeuralUtil.prepareInputSet(testArray, dataMNIST, dataSet, preprocesMethod, min, max);
-        labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, read.getTestDataSet());
+        labels = NeuralUtil.prepareOutputSet(testArray,nOut,dataMNIST, GPathReader.getTestDataSet());
         return testArray ;
     }
 

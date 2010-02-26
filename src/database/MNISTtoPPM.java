@@ -6,7 +6,7 @@ public class MNISTtoPPM extends Object {
   public static void main(String [] args ) {
     MNISTImageFile imgF = null;
     MNISTLabelFile lblF = null;
-    MNISTDatabase data = new MNISTDatabase();
+    MNISTDatabase data = MNISTDatabase.getInstance();
     if (args.length!=2) {
       System.err.println("MNISTtoPPM syntax: MNISTtoPPM  <img offset>");
       System.exit(0);
