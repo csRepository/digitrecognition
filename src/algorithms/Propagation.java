@@ -6,6 +6,7 @@
 package algorithms;
 
 import java.util.ArrayList;
+import neuralnetwork.Activation;
 import neuralnetwork.Neuron;
 import neuralnetwork.Synapse;
 
@@ -15,13 +16,13 @@ import neuralnetwork.Synapse;
  */
 public abstract class Propagation {
 
-    public void calcOutDelta(Neuron neuron, double d, double primeTerm) {
+    public void calcOutDelta(Neuron neuron, double d) {
             double value = neuron.getValue();
             double error = d - value;
-            neuron.setDelta(-(error) * neuron.sigmDerivative(value,primeTerm));
+            neuron.setDelta(-(error) * Activation.sigmDerivative(value));
     }
 
-    public void calcHiddDelta(Neuron neuron, double primeTerm) {
+    public void calcHiddDelta(Neuron neuron) {
             double sumErr = 0;
             double value = neuron.getValue();
             ArrayList<Synapse> outSynapses = neuron.getOutgoingSyn();
@@ -29,7 +30,7 @@ public abstract class Propagation {
                 Synapse syn =  outSynapses.get(i);
                 sumErr += syn.getToNeuron().getDelta() * syn.getValue(); //delta_neuronu_warstwy_wyj * waga
             }
-           neuron.setDelta(sumErr * neuron.sigmDerivative(value,primeTerm));
+           neuron.setDelta(sumErr * Activation.sigmDerivative(value));
     }
    /**
      * Calculate gradient

@@ -20,7 +20,7 @@ public class NeuralNet {
          * @param layersSizes array with sizes of layers eg. layersSizes contains {100,30,10}
          * @return NeuralNet
          */
-        public static NeuralNet FeedForwardNetwork(int[] layersSizes) {
+        public static void createFeedForwardNetwork(int[] layersSizes) {
             layers = new ArrayList();
             for (int i = 0; i < layersSizes.length; i++) {
                  layers.add(new Layer(layersSizes[i]));
@@ -28,14 +28,13 @@ public class NeuralNet {
             connectLayers(layersSizes[0], layersSizes[1]-1, 0, 1);
             connectLayers(layersSizes[1], layersSizes[2], 1, 2);
             setBiases(1);
-            return new NeuralNet();
         }
 
 	/**
 	 * Adding layer to network
 	 * @param n count of neurons
 	 */
-	public void addLayer(int n) {
+	public static void addLayer(int n) {
             layers.add(new Layer(n));
 	}
         /**
@@ -43,14 +42,14 @@ public class NeuralNet {
          * @param n number of layer
          * @return Layer
          */
-	public  Layer getLayer(int n) {
+	public static Layer getLayer(int n) {
             return layers.get(n);
 	}
         /**
          * Return List of Layer in NeuralNetwork
          * @return List
          */
-        public ArrayList<Layer> getLayers() {
+        public static ArrayList<Layer> getLayers() {
             return layers;
         }
 
@@ -58,7 +57,7 @@ public class NeuralNet {
          * Obliczenie wyjsc neuronow poczynajac od warstwy wejsciowej w
          * kierunku wyjsciowej
          */
-        public void passForward(){
+        public static void passForward(){
             Neuron neuron;
             int layersSize = layers.size();
             int out = 0; //czy aktualna warstwa to war. wyjsciowa (0 - nie)
@@ -78,17 +77,18 @@ public class NeuralNet {
          * danego wzorca
          * @param desAns tablica porzadanych odpowiedzi
          */
-        public double calculateError(double [] desAns) {
+        public static double calculateError(double [] desAns) {
             Layer layer = layers.get(layers.size()-1);
             size += 1;  //liczba przetworzonych wzorcow
             double newError = 0;
             double error;
+            double outSize = desAns.length;
             int layerSize = layer.size();
             for (int i = 0; i < layerSize; i++) {
                 error = desAns[i] - layer.getNeuron(i).getValue();
                 newError += error*error;
             }
-             newError /= 10;
+             newError /= outSize;
 
              mse += newError ;
              return newError;
@@ -98,7 +98,7 @@ public class NeuralNet {
          * Calculate Root Mean Square Error (RMS)
          * @return rms error
          */
-        public double calculateRMS() {
+        public static double calculateRMS() {
             double errorRMS = Math.sqrt(mse/size);
             size=0;
             mse=0;
@@ -109,7 +109,7 @@ public class NeuralNet {
          * where "din" is count of weights incoming to a node.
          * @param seed Seed needed to make weights random
          */
-        public void initializeWeights(long seed) {
+        public static void initializeWeights(long seed) {
             Neuron neuron;
             Random random = new Random(seed);
             int layersSize = layers.size();
@@ -130,7 +130,7 @@ public class NeuralNet {
          * Initialize weights to (-a;a)
          * @param seed Seed needed to make weights random
          */
-        public void initializeWeightsDefault(long seed) {
+        public static void initializeWeightsDefault(long seed) {
             Neuron neuron;
             Random random = new Random(seed);
             int layersSize = layers.size();

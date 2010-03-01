@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
 
 /**
  *
@@ -11,12 +12,11 @@ import java.io.IOException;
  */
 public final class WeightsFileWriter extends DataOutputStream {
 
-    String fileName;
-
     public WeightsFileWriter(String filename, int networkSize) throws IOException {
         super(new BufferedOutputStream(
+                new GZIPOutputStream(
                   new FileOutputStream(filename)
-              )
+              ))
         );
 
             writeInt(2222);
