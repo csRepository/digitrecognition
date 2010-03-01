@@ -9,30 +9,29 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.zip.GZIPInputStream;
 
 /**
  * 
  * @author Glowczynski Tomasz
  */
-public final class WeightsFileReader extends DataInputStream {
+public class WeightsFileReader extends DataInputStream {
 
-    String fileName;
-    int count;
-    int header;
+    private int count;
+    private int header;
 
-
-    // TODO zmienic na tablice parametrow
     public WeightsFileReader(String filename) throws IOException {
 
         super(new BufferedInputStream(
+                new GZIPInputStream(
                   new FileInputStream(filename)
-              )
+              ))
         );
         if (readInt()!=2222) {
               System.err.println("To nie jest poprawny plik z wagami sieci");
               System.exit(0);
         }
-        this.count = readInt();
+        count = readInt();
     }
 
     public double[] readData(int x) {

@@ -28,29 +28,9 @@ public class Neuron {
                 syn = incomingSyn.get(i);
 	    	sum += syn.getValue() * syn.getFromNeuron().getValue();
 	    }
-	  value = sigm(sum); // sigmoid function
+	  value = Activation.sigmoid(sum); // sigmoid function
           
 	  }
-
-        private static  double tanh (double u)
-        {
-            double a = Math.exp( u );
-            double b = Math.exp( -u );
-            return ((a-b)/(a+b));
-        }
-
-        private static double sigm (double u)
-        {
-            return 1.0 / (1 + Math.exp(-1.0 * u));
-        }
-
-        public  double sigmDerivative(double d, double primeTerm) {
-            return d * (1.0 - d) + primeTerm;
-	}
-
-        public  double tanhDerivative(double d) {
-            return  (1 + d) * (1 - d);
-	}
 
     /**
      * @return the inlinks
