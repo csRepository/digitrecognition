@@ -2,8 +2,6 @@ package util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Tool class for writing and reading weights.
@@ -11,13 +9,14 @@ import java.util.logging.Logger;
  */
 public final class WeightsFileUtil {
 
-    public static double[] readWeights(double networkSize, String fileName) throws IOException {
-        WeightsFileReader wFile = null;
-        
-        double dataread[] = null;
+    private WeightsFileUtil() {}
 
+    public static double[] readWeights(double networkSize, String fileName) {
+        WeightsFileReader wFile = null;
+        double dataread[] = null;
         try {
             wFile = new WeightsFileReader(fileName);
+            try {
                 dataread = new double[wFile.getCount()];
                 if (dataread.length == networkSize)
                     dataread = wFile.readData(dataread.length);
@@ -25,11 +24,12 @@ public final class WeightsFileUtil {
                     System.out.println("Plik wag nie zgadza się z architekturą sieci.");
                     System.exit(0);
                 }
+            }
+            finally {
+                wFile.close();
+            }
         } catch (IOException ex) {
             System.err.println("Blad I/O pliku: " + ex);
-        }
-        finally {
-            wFile.close();
         }
         return dataread;
     }
@@ -66,22 +66,20 @@ public final class WeightsFileUtil {
 //        }
 //    }
     public static void writeWeights(double data[], String fileName) {
-         int w = -1;
          WeightsFileWriter wFile = null;
          try {
              File file = new File(fileName);
-             file = file.getParentFile();
-             file.mkdirs();
-                 wFile = new WeightsFileWriter(fileName, data.length);
-                 wFile.writeData(data);
+             try {   
+                file = file.getParentFile();
+                file.mkdirs();
+                wFile = new WeightsFileWriter(fileName, data.length);
+                wFile.writeData(data);
+             }
+             finally {
+                 wFile.close();
+             }
         } catch (IOException ex) {
-            System.err.println("Blad I/O pliku: " + ex);
-        } finally {
-            try {
-                wFile.close();
-            } catch (IOException ex) {
-                Logger.getLogger(WeightsFileUtil.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            System.err.println("I/O error: " + ex);
         }
     }
 }

@@ -14,8 +14,8 @@ public class Neuron {
         private ArrayList<Synapse> outgoingSyn;            // lista zawieraj�ca sysnapsy wychodz�ce z neuronu
 
 	public Neuron() {
-		incomingSyn = new ArrayList<Synapse>();
-		outgoingSyn = new ArrayList<Synapse>();
+            incomingSyn = new ArrayList<Synapse>();
+            outgoingSyn = new ArrayList<Synapse>();
 	}
 
         /**
@@ -28,8 +28,7 @@ public class Neuron {
                 syn = incomingSyn.get(i);
 	    	sum += syn.getValue() * syn.getFromNeuron().getValue();
 	    }
-	  value = Activation.sigmoid(sum); // sigmoid function
-          
+	  value = Activation.sigmoid(sum); // sigmoid function      
 	  }
 
     /**

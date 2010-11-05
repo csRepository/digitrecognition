@@ -60,7 +60,7 @@ public class Test {
               desiredAns = NeuralUtil.setOutputLayer(i, labels);
              // feed-forward
              NeuralNet.passForward();
-             badRecognizedCount += NeuralUtil.validate(OutputLayer, desiredAns);
+             badRecognizedCount += NeuralUtil.validate(OutputLayer, desiredAns,i+1,true);
          }
 
          // wyswietlanie niepoprawnych rozpoznan sieci

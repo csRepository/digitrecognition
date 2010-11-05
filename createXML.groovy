@@ -10,10 +10,13 @@ for (int i=10; i <= 300; i+=10) {
     if (i == istart+40) {istart=i; k++;} 
     
     network.parameters.hidden = i
-    def algorithm = network.parameters.algorithm 
-    def algId = network.algorithm.find { it.name == algorithm }.@id
-    def parameters = network.algorithm.find { it.name == algorithm }.parameter
-    parameters.collect {it.toDouble()}
+    def algorithm = network.parameters.algorithm.type 
+    def algId = ""
+    if (algorithm=="BackPropagation") algId = "bp"
+    else if (algorithm=="ResilentPropagation") algId = "rp"
+    else algId = "qp"   
+ //def parameters = network.algorithm.find { it.@name == algorithm }.parameter
+    //parameters.collect {it.toDouble()}
     //String s = "_"
     //for (int w=0; w<parameters.size();w++){
     //	s += parameters[w];
@@ -25,7 +28,7 @@ for (int i=10; i <= 300; i+=10) {
 	if (i<100) inr = "0";
 	else inr = "";
 
-	String outdir = algId.text() + "/standard_param/"// <------------------nazwa badania----------
+	String outdir = algId.text() + "/binarization/"// <------------------nazwa badania----------
 
     	network.parameters.weights_file = "weights/" + outdir + algId + "_" + inr + i + "_" + jnr + j +".dat"	//plik do zapisu wag
 
