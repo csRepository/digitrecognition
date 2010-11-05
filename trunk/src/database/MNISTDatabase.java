@@ -1,6 +1,7 @@
 package database;
 
 import java.io.*;
+import util.*;
 
 /**
  * Class with methods for handling reading images/labels from MNIST data files.
@@ -9,10 +10,10 @@ public class MNISTDatabase  {
 
     private static MNISTImageFile trainImgF,testImgF;
     private static MNISTLabelFile trainLblF,testLblF;
-    public String trainImgFPath = "digitDatabase/train-images-idx3-ubyte";
-    public String trainLblFPath = "digitDatabase/train-labels-idx1-ubyte";
-    public String testImgFPath = "digitDatabase/t10k-images-idx3-ubyte";
-    public String testLblFPath = "digitDatabase/t10k-labels-idx1-ubyte";
+    private String trainImgFPath = GPathReader.getTrainImagesPath();
+    private String trainLblFPath = GPathReader.getTrainLabelsPath();
+    private String testImgFPath  = GPathReader.getTestImagesPath();
+    private String testLblFPath  = GPathReader.getTestLabelsPath();
 
   private static final MNISTDatabase INSTANCE = new MNISTDatabase();
 
@@ -55,6 +56,33 @@ public class MNISTDatabase  {
             lblFile = testLblF;
             lblFile.setCurr(nr);      //etykieta
             return lblFile.readData();
+    }
+        /**
+     * @return the trainImgFPath
+     */
+    public String getTrainImgFPath() {
+        return trainImgFPath;
+    }
+
+    /**
+     * @return the trainLblFPath
+     */
+    public String getTrainLblFPath() {
+        return trainLblFPath;
+    }
+
+    /**
+     * @return the testImgFPath
+     */
+    public String getTestImgFPath() {
+        return testImgFPath;
+    }
+
+    /**
+     * @return the testLblFPath
+     */
+    public String getTestLblFPath() {
+        return testLblFPath;
     }
 }
 

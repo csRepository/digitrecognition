@@ -8,6 +8,7 @@ import org.xml.sax.SAXException
 class GPathReader {
 
     private static network
+    private static data
     private static int epochsCount
     private static int hiddenNeuronsCount
     private static double accuracy; //parameter z pliku
@@ -23,14 +24,18 @@ class GPathReader {
     private static double[] algParameters
     private static String weightsFileName
     private static double sigmoidPrimeTerm
-    private static double rangeMin
-    private static double rangeMax
+    private static double rangeMin, rangeMax
+    private static String trainImagesPath, trainLabelsPath
+    private static String testImagesPath, testLabelsPath
+    private static String regularization
 
     private GPathReader() {}
     
     public static setParametersFile(String file) {
         try {
-            network = new XmlSlurper().parse(file)
+            static root = new XmlSlurper().parse(file)
+            network = root.network
+            data = root.database
             readParametersFromFile()
         }
         catch (SAXException ex) {
@@ -49,22 +54,27 @@ class GPathReader {
         preprocessMethod   = network.parameters.patterns.preprocess.@method.text().trim()
         rangeMin           = network.parameters.patterns.preprocess.@min.toDouble()
         rangeMax           = network.parameters.patterns.preprocess.@max.toDouble()
-        rmsValue           = network.parameters.error.toDouble()
-        epochsCount        = network.parameters.epochs.toInteger()
-        accuracy           = network.parameters.accuracy.toDouble()
+        rmsValue           = network.parameters.stop_criteria.error.toDouble()
+        epochsCount        = network.parameters.stop_criteria.epochs.toInteger()
+        accuracy           = network.parameters.stop_criteria.accuracy.toDouble()
         algorithmType      = network.parameters.algorithm.type.text().trim()
         updateMethodType   = network.parameters.algorithm.update_method.text().trim()
         backpropSkip       = network.parameters.algorithm.backprop_skip.toBoolean()
+        regularization     = network.parameters.algorithm.regularization.text().trim()
         decayValue         = network.parameters.algorithm.weights_decay.toDouble()
         sigmoidPrimeTerm   = network.parameters.algorithm.sgm_prime_term.toDouble()
         weightsFileName    = network.parameters.weights_file.text().trim()
         validate           = network.parameters.validate.toBoolean()
         test               = network.parameters.test.toBoolean()
         algParameters      = getParameters(algorithmType)
+        trainImagesPath    = data.train.images.text().trim()
+        trainLabelsPath    = data.train.labels.text().trim()
+        testImagesPath    = data.test.images.text().trim()
+        testLabelsPath    = data.test.labels.text().trim()
     }
 
     private static double[] getParameters(String name) {
-        def parameters = network.algorithm.find { it.name == name}.parameter
+        def parameters = network.algorithm.find { it.@name == name}.parameter
         parameters.collect {it.toDouble()}
     }
 
@@ -158,6 +168,22 @@ class GPathReader {
 
     public static String getWeightsFileName() {
         return weightsFileName;
+    }
+    public static String getTrainImagesPath() {
+        return trainImagesPath;
+    }
+    public static String getTrainLabelsPath() {
+        return trainLabelsPath;
+    }
+    public static String getTestImagesPath() {
+        return testImagesPath;
+    }
+    public static String getTestLabelsPath() {
+        return testLabelsPath;
+    }
+
+    public static String getRegularizationMethod() {
+        return regularization;
     }
 }
 

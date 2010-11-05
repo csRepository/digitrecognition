@@ -6,10 +6,11 @@
 package util;
 
 import database.MNISTDatabase;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,27 +23,27 @@ import neuralnetwork.Neuron;
  * @author Glowczynski Tomasz
  */
 public class NeuralUtil {
-  //  private static HashMap map;
+    private static Random rand = new Random();
+   // static HashMap map;
+    private NeuralUtil() {}
     /*
      * Wczytuje plik konfiguracyjny z parametrami sieci
      */
-
-    public static GPathReader readConfigFile(String[] args) {
-                if (args.length > 0) {
-                File file = new File(args[0]);
-                if (!file.exists()) {
-                     System.err.println("Brak pliku konfiguracyjnego");
-                     System.exit(1);
-                } else {
-                    GPathReader.setParametersFile(args[0]);
-                }
+    public static void readConfigFile(String[] args) {
+         if (args.length > 0) {
+            try {
+                GPathReader.setParametersFile(args[0]);
+            }
+            catch (NullPointerException ex){
+                System.err.println("Brak pliku konfiguracyjnego");
+                System.exit(1);
+            } 
         }
         else {
-                System.err.println("Brak parametru z plikiem konfiguracyjnym" +
-                                    " np. java -jar Train \"parameters.xml\" ");
-                System.exit(1);
+            System.err.println("Brak parametru z plikiem konfiguracyjnym" +
+                                " np. java -jar Train \"parameters.xml\" ");
+            System.exit(1);
         }
-        return null;
     }
 
 
@@ -85,7 +86,7 @@ public class NeuralUtil {
      */
     public static double[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
         double tab[][] = new double[array.size()][10];
-        //map = new HashMap();
+      //  map = new HashMap();
         for (int i = 0; i < array.size(); i++) {
             double d[] = new double[outSize];
             for (int j = 0; j < outSize; j++)
@@ -99,7 +100,7 @@ public class NeuralUtil {
 //            } else
 //            map.put(getLabel(array.get(i), data, dataType), 1);
         }
-      //  System.out.println(map);
+       //z System.out.println(map);
         return tab;
     }
      public static void setInputLayer(Layer inputLayer, int pattNr,double[][][] images) {
@@ -107,9 +108,9 @@ public class NeuralUtil {
         int length = images[pattNr].length;
         for (int k = 0; k < length; k++) {
             for (int j = 0; j < length; j++) {
-            Neuron neuron = inputLayer.getNeuron(index);
-            neuron.setValue(images[pattNr][k][j]);
-            index++;
+                Neuron neuron = inputLayer.getNeuron(index);
+                neuron.setValue(images[pattNr][k][j]);
+                index++;
             }
         }
     }
@@ -125,7 +126,7 @@ public class NeuralUtil {
         for(int i = startPattern; i <= endPattern; i++) {
                // if (i % (size/patternCount) == 0 && i == 0) array.add(i+1);
                 if (i % (size/patternCount) == 0) array.add(i);
-            }
+        }
     }
         /*
      * Losowanie liczb z zadanego przedzialu [a,b] do tablicy
@@ -135,7 +136,7 @@ public class NeuralUtil {
         for (int i=0;i<array.size();i++) {
             list.add(array.get(i));
         }
-        Random rand = new Random();
+       
         int k = 0;
         while (list.size()>0)  {
             int elem = list.remove(rand.nextInt(list.size()));
@@ -175,61 +176,58 @@ public class NeuralUtil {
         return data1;
     }
 
-    private static double[][] OtsuTreshold(int[][] data, double min, double max) {
-        // Calculate histogram
-        int[] histData = new int[256];
-         for (int i = 0; i < data.length; i++) {
-            for (int j = 0; j < data[i].length; j++) {
-               int h = data[i][j];
-          //  System.out.print(h);
-           histData[h] ++;
-            }
+private static double[][] OtsuTreshold(int[][] data, double min, double max) {
+    // Obliczenie histogramu
+    int[] histData = new int[256];
+     for (int i = 0; i < data.length; i++) {
+        for (int j = 0; j < data[i].length; j++) {
+           int h = data[i][j];
+       histData[h] ++;
         }
-        // Total number of pixels
-        int total = data.length * data.length;
-
-        float sum = 0;
-        for (int t=0 ; t<256 ; t++) sum += t * histData[t];
-
-        float sumB = 0;
-        int wB = 0;
-        int wF = 0;
-
-        float varMax = 0;
-        int threshold = 0;
-
-        for (int t=0 ; t<256 ; t++) {
-           wB += histData[t];               // Weight Background
-           if (wB == 0) continue;
-
-           wF = total - wB;                 // Weight Foreground
-           if (wF == 0) break;
-
-           sumB += (float) (t * histData[t]);
-
-           float mB = sumB / wB;            // Mean Background
-           float mF = (sum - sumB) / wF;    // Mean Foreground
-
-           // Calculate Between Class Variance
-           float varBetween = (float) (wB * wF) * (mB - mF) * (mB - mF);
-
-           // Check if new maximum found
-           if (varBetween > varMax) {
-              varMax = varBetween;
-              threshold = t;
-           }
-        }
-
-        // Apply threshold to create binary image
-        double[][] outData = new double[data.length][data.length];
-        for (int i = 0; i < data.length; i++) {
-            for (int j = 0; j < data[i].length; j++) {
-               outData[i][j] = (data[i][j] >= threshold) ?  max : min;
-            }
-        }
-        return outData;
-
     }
+    // Liczba wszytkich pikseli
+    int total = data.length * data[0].length;
+
+    //suma wszystkich wartosci histogramu x prog - do obiczenia sredniej
+    float sum = 0;
+    for (int t=0 ; t<256 ; t++) sum += t * histData[t];
+
+    float sumB = 0;
+    int wB = 0;
+    int wF = 0;
+
+    float varMax = 0;
+    int threshold = 0;
+
+    for (int t=0 ; t<256 ; t++) {
+       wB += histData[t];               // Tlo wagi
+       if (wB == 0) continue;
+
+       wF = total - wB;                 // Obiekt wagi
+       if (wF == 0) break;
+
+       sumB += (float) (t * histData[t]);
+
+       float mB = sumB / wB;            // wartosc srednia tla
+       float mF = (sum - sumB) / wF;    // wartosc srednia obiektu
+       // Wyznaczenie wariancji miedzy-klasowej
+       float varBetween = (float) (wB * wF) * (mB - mF) * (mB - mF);
+       // Sprawdzenie czy wariancja progu jest wieksza od poprzedniej
+       if (varBetween > varMax) {
+          varMax = varBetween;
+          threshold = t;
+       }
+    }
+    //Progowanie obrazu
+    double[][] outData = new double[data.length][data[0].length];
+    for (int i = 0; i < data.length; i++) {
+        for (int j = 0; j < data[i].length; j++) {
+           outData[i][j] = (data[i][j] >= threshold) ?  max : min;
+        }
+    }
+    return outData;
+
+}
     
     /*
      * Skalowanie calej tablicy z przedzialem wartosci od - do do
@@ -258,7 +256,7 @@ public class NeuralUtil {
         return (((double)temp)/Math.pow(10,c));
       }
 
-      public static int validate(Layer outputLayer, double[] desiredAns) {
+      public static int validate(Layer outputLayer, double[] desiredAns, int pattNr, boolean printAll) {
         double max[] = new double[2];
         double pom = 0;
 
@@ -274,23 +272,46 @@ public class NeuralUtil {
          //jesli wyjscie odpowiedzi oczekiwanych != 1 czyli cyfra z bazy nie odpowiada
          //najwiekszemu wyjsciu to cyfra nie zostala rozpoznana
         // int digit = 0;
+        if (!printAll) {
          if (desiredAns[(int)max[0]] != 1)
             return 1;   //zle rozpoznany
          else return 0; //rozpoznany
+        }
+        else {
+            DecimalFormat digitDec = new DecimalFormat("#,##0.00000000000");//formats to 2 decimal places
+            String value = digitDec.format(max[1]);
+
         //------------------wypisywanie zle rozpoznanych wzorcow
-//             int digit = 0;
-//             if (desiredAns[(int)max[0]]!= 1)
-//             {
-//                 for (int j = 0; j < desiredAns.length; j++) {
-//                     if (desiredAns[j] == 1)  digit = j;
-//                 }
-//                 ++badRecognizedCount;
-////                 System.out.println(badRecognizedCount + ": Digit: " + digit + " Recognized: " +
-////                    + (int)max[0] + " value: " + max[1] + " patternNr:" + patternsNr.get(i) );
-//            }
+             int digit = 0;
+             if (desiredAns[(int)max[0]]!= 1)
+             {
+                 for (int j = 0; j < desiredAns.length; j++) {
+                     if (desiredAns[j] == 1)  digit = j;
+                 }
+                 System.out.println("Digit: " + digit + " Recognized: " +
+                    + (int)max[0] + " value: " + value + " patternNr:" + pattNr );
+                // System.out.println(digit + "->"
+                 //   + (int)max[0] + " " +pattNr );
+                 return 1;
+            }
+             else return 0; //rozpoznany
+        }
     }
 
     public static double calculateClassError(int badRecognizedCount, int patternsCount) {
         return NeuralUtil.roundToDecimals(100 - badRecognizedCount/(double)patternsCount*100,2);
+    }
+    public static long getSeed() {
+        String wFile = GPathReader.getWeightsFileName();
+        long seed;
+        try {
+            seed = Long.parseLong(wFile.substring(wFile.length()-6,wFile.length()-4));
+            //seed = System.currentTimeMillis();
+        }
+        catch (NumberFormatException ex){
+            seed = System.currentTimeMillis();
+        }
+       // System.out.println(seed);
+        return seed;
     }
 }

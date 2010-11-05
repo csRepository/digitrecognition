@@ -36,17 +36,24 @@ public abstract class Propagation {
      * Calculate gradient
      * @param neuron   the neuron whose incoming weights will be changed
      */
-    public  void calcUpdate(Neuron neuron, double decay) {
+    public  void calcUpdate(Neuron neuron, double decay, String regularizationMethod) {
         ArrayList<Synapse> incSyns = neuron.getIncomingSyn();
         int size = incSyns.size();
         double delta = neuron.getDelta();
         for (int i=0;i<size;i++) {
            Synapse syn = incSyns.get(i);
            double gradient = getActualGradient(delta, syn);//neuron.getDelta() * syn.getFromNeuron().getValue();
-           if (decay != 0)
-           if (i!=size-1) //nie uwzgledniamy synaps biasu przy zanikaniu wag
-                gradient += decay * syn.getValue();
-            syn.setGradient(syn.getGradient() + gradient);
+           if (decay != 0) {
+               if (regularizationMethod.equals("decay")) {
+                   if (i!=size-1) //nie uwzgledniamy synaps biasu przy zanikaniu wag
+                    gradient += weightDecay(syn, decay);
+               }
+               else if (regularizationMethod.equals("elimination")) {
+                    if (i!=size-1) //nie uwzgledniamy synaps biasu przy zanikaniu wag
+                       gradient += weightElimination(syn, decay);
+               }
+           }
+           syn.setGradient(syn.getGradient() + gradient);
         }
     }
     /**
@@ -74,11 +81,7 @@ public abstract class Propagation {
     }
     private static double weightElimination(Synapse syn, double decay) {
         return (decay * syn.getValue()) /
-                Math.pow(0.5 + syn.getValue()*syn.getValue(), 2); //weight elimination
-    }
-
-    public static void getInstance() {
-        
+                Math.pow(1 + syn.getValue()*syn.getValue(), 2); //weight elimination
     }
 }
 

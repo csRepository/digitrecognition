@@ -27,7 +27,7 @@ public class Train {
     /*-------------- parametry z pliku ---------------------------------------*/
     private static double decay;
     private static int trainPatternsCount,validatePatternsCount,testPatternsCount;
-    private static String method;           //określa sposob zmiany wag
+    private static String method, regularizationMethod;
     private static boolean backpropSkip, validate, test;
 
 
@@ -41,6 +41,7 @@ public class Train {
         testPatternsCount      = GPathReader.getTestPatternsCount();
         method                 = GPathReader.getUpdateMethodType();
         decay                  = GPathReader.getDecayValue();
+        regularizationMethod   = GPathReader.getRegularizationMethod();
         backpropSkip           = GPathReader.isBackpropSkip();
         validate               = GPathReader.isValidate();
         test                   = GPathReader.isTest();
@@ -68,7 +69,7 @@ public class Train {
         weightsCopy = new double[weightsCount];
         /*---------------------------------------*/
         
-        NeuralNet.initializeWeights(getSeed());
+        NeuralNet.initializeWeights(NeuralUtil.getSeed());
         Activation.setPrimeTerm(primeTerm);
         
         /* -------make instance of algorithm class -------------------------*/
@@ -183,7 +184,7 @@ public class Train {
     private static void learn() {
         licz++;
         if (method.equals("online"))
-            NeuralUtil.randomizePatterns(trainPatternsNr); //przemieszanie kolejnosci wzorcow
+           NeuralUtil.randomizePatterns(trainPatternsNr); //przemieszanie kolejnosci wzorcow
         int badRecognizedCount = 0;
 
         //-------------------     validate       --------------------------
@@ -193,7 +194,7 @@ public class Train {
               NeuralUtil.setInputLayer(InputLayer,pattNr, validateImages);
               desiredAns = NeuralUtil.setOutputLayer(pattNr, validateLabels);
               NeuralNet.passForward();
-              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns,pattNr,false);
            }
            //-----------------blad klasyfikacji-----------------------------
            validateAccuracy = NeuralUtil.calculateClassError(badRecognizedCount,validatePatternsCount);
@@ -215,7 +216,7 @@ public class Train {
               NeuralUtil.setInputLayer(InputLayer,pattNr, testImages);
               desiredAns = NeuralUtil.setOutputLayer(pattNr, testLabels);
               NeuralNet.passForward();
-              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns,pattNr,false);
              }
             //-----------------classification error-----------------------------
            
@@ -230,7 +231,7 @@ public class Train {
               NeuralUtil.setInputLayer(InputLayer, pattNr, trainImages);
               desiredAns = NeuralUtil.setOutputLayer(pattNr, trainLabels);
               NeuralNet.passForward();
-              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns);
+              badRecognizedCount += NeuralUtil.validate(OutputLayer,desiredAns,pattNr,false);
               double error = NeuralNet.calculateError(desiredAns);
                 /*------skipping learning for trained patterns------------------------------------*/
                  if (backpropSkip) {
@@ -272,10 +273,10 @@ public class Train {
                 Neuron neuron = layer.getNeuron(j);
                 if (i == layersSize-1) {
                      alg.calcOutDelta(neuron, desiredAns[j]);
-                     alg.calcUpdate(neuron, decay);
+                     alg.calcUpdate(neuron, decay, regularizationMethod);
                 } else {
                      alg.calcHiddDelta(neuron);
-                     alg.calcUpdate(neuron, decay);
+                     alg.calcUpdate(neuron, decay, regularizationMethod);
                 }
             }
          }
@@ -309,17 +310,5 @@ public class Train {
          }
     }
 
-    private static long getSeed() {
-        String wFile = GPathReader.getWeightsFileName();
-        long seed;
-        try {
-            seed = Long.parseLong(wFile.substring(wFile.length()-6,wFile.length()-4));
-        }
-        catch (NumberFormatException ex){
-            seed = System.currentTimeMillis();
-        }
-       // System.out.println(seed);
-        return seed;
 
-    }
 }

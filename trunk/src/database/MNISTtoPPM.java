@@ -6,14 +6,15 @@ public class MNISTtoPPM extends Object {
   public static void main(String [] args ) {
     MNISTImageFile imgF = null;
     MNISTLabelFile lblF = null;
-    MNISTDatabase data = MNISTDatabase.getInstance();
-    if (args.length!=2) {
-      System.err.println("MNISTtoPPM syntax: MNISTtoPPM  <img offset>");
-      System.exit(0);
-    } else {
+    //MNISTDatabase data = MNISTDatabase.getInstance();
+  //  if (args.length!=2) {
+    //  System.err.println("MNISTtoPPM syntax: MNISTtoPPM  <img offset>");
+   //   System.exit(0);
+ //   } else {
       try {
-	imgF = new MNISTImageFile(data.testImgFPath,"r");
-	lblF = new MNISTLabelFile(data.testLblFPath,"r");
+
+	imgF = new MNISTImageFile("digitDatabase/t10k-images-idx3-ubyte","r");
+	lblF = new MNISTLabelFile("digitDatabase/t10k-labels-idx1-ubyte","r");
       } catch (FileNotFoundException e) { 
 	System.err.println("File not found: " + e);
 	System.exit(0);
@@ -23,12 +24,12 @@ public class MNISTtoPPM extends Object {
       }
       imgF.setCurr(Integer.parseInt(args[0]));
       lblF.setCurr(Integer.parseInt(args[0]));
-      if (  args[1].equals("image"))
+     // if (  args[1].equals("image"))
         printPPMToStdOut(imgF, lblF);
-      else
-        printLabelToStdErr(lblF);
+    //  else
+     //   printLabelToStdErr(lblF);
     }
-  }
+ // }
 
   public static void printLabelToStdErr(MNISTLabelFile lblF) {
     //Prints to stderr the number that the image is supposed to be 

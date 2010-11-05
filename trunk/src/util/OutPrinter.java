@@ -20,6 +20,8 @@ public class OutPrinter {
     private static double rangeMax         = GPathReader.getRangeMax();
     private static String preprocessMethod = GPathReader.getPreprocessMethod();
 
+    private OutPrinter() {}
+
     public static void printTrainHeader() {
 
         System.out.println("------\n" + "Data set: " + trainDataSet);
@@ -49,7 +51,7 @@ public class OutPrinter {
                 " Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
         }
         else {
-            System.out.printf("\nValidation accuracy: %.2f%% \nEpochs: %d\n", trainAccuracy, licz);
+            System.out.printf("\nTrain accuracy: %.2f%% \nEpochs: %d\n", trainAccuracy, licz);
             System.out.println("Total learning time: " + NeuralUtil.roundToDecimals((double)time/1000,0) + " sek");
         }
     }
