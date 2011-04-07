@@ -6,6 +6,9 @@
             <extension file="groovy-build.xml" id="groovy">
                 <dependency dependsOn="-groovy-init-macrodef-javac" target="-pre-pre-compile"/>
             </extension>
+            <extension file="jnlp-impl.xml" id="jws">
+                <dependency dependsOn="jnlp" target="jar"/>
+            </extension>
         </buildExtensions>
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
             <name>digitrecognition</name>
