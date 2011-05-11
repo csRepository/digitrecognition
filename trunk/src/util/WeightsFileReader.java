@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
 /**
- * 
+ * Weights reading implementation. 
  * @author Glowczynski Tomasz
  */
 public class WeightsFileReader extends DataInputStream {

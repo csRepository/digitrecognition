@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
 /**
- *
+ * Weights writing implementation. 
  * @author Glowczynski Tomasz
  */
 public final class WeightsFileWriter extends DataOutputStream {

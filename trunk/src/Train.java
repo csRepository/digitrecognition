@@ -11,19 +11,19 @@ import util.*;
  */
 public class Train {
 
-    private static Layer InputLayer,OutputLayer;	//  warstwa wejsciowa, warstwa wyjsciowa
+    private static Layer InputLayer,OutputLayer;	
     private static double actualRMS;
     private static Propagation alg;
     private static double[][][] trainImages,validateImages,testImages;
     private static double[][] trainLabels,validateLabels,testLabels;
-    private static double[] desiredAns;         //oczekiwane odpowiedzi sieci
+    private static double[] desiredAns;         
     private static ArrayList<Integer> trainPatternsNr, validatePatternsNr,testPatternsNr;
-    private static int licz;         //aktualna liczba epok
-    private static int epochStopNr;   //nr epoki do zatrzymania uczenia
+    private static int licz;         //actual epochs count
+    private static int epochStopNr;   //when to stop learning phase
     private static double trainAccuracy,validateAccuracy,testAccuracy;
-    private static double lowValidError;    //najmniejszy blad walidacji
-    private static double[] weightsCopy;    //kopia wag przy walidacji
-    private static long time_start,time_mid,time_end; //pomiar czasu
+    private static double lowValidError;    //smallest validation error 
+    private static double[] weightsCopy;    //weights backup for validaton
+    private static long time_start,time_mid,time_end; //time measurement
     /*-------------- parametry z pliku ---------------------------------------*/
     private static double decay;
     private static int trainPatternsCount,validatePatternsCount,testPatternsCount;
@@ -149,7 +149,7 @@ public class Train {
         int startPattern = 1;
         int endPattern = 60000;
         if (typeOfSet.equals("train")) {
-            if (validate) endPattern = 50000;  //z walidacja zbior trenujacy mniejszy o 10000
+            if (validate) endPattern = 50000;  //set smaller by 10000 examples using validation 
         }
         else if (typeOfSet.equals("test")) {
             dataSet = GPathReader.getTestDataSet();

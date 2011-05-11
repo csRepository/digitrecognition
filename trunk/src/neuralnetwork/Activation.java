@@ -6,8 +6,8 @@
 package neuralnetwork;
 
 /**
- *
- * @author tm
+ * Implementation of activation function.
+ * @author Glowczynsk Tomasz
  */
 public class Activation {
     
