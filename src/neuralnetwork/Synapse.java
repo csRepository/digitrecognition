@@ -1,7 +1,7 @@
 package neuralnetwork;
 
 /**
- * Makes a connection between two neighbours layers.
+ * Makes a connection between two neighboring layers.
  * @author Glowczynski Tomasz
  */
 public class Synapse {

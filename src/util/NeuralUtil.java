@@ -19,15 +19,15 @@ import neuralnetwork.Layer;
 import neuralnetwork.Neuron;
 
 /**
- * Class that contains methods for handling train and test programs.
+ * Class contains methods for handling train and test programs.
  * @author Glowczynski Tomasz
  */
 public class NeuralUtil {
     private static Random rand = new Random();
    // static HashMap map;
     private NeuralUtil() {}
-    /*
-     * Wczytuje plik konfiguracyjny z parametrami sieci
+    /**
+     * Reads config file with neural network parameters.
      */
     public static void readConfigFile(String[] args) {
          if (args.length > 0) {
@@ -82,7 +82,7 @@ public class NeuralUtil {
     }
 
     /*
-     * Przygotowuej tablice wszystkich wyjsc (tablica [nr][tablica_wyjsc[10])
+     * Funcion for preparing outputs (array [nr][outputs_array[10])
      */
     public static double[][] prepareOutputSet(ArrayList<Integer> array, int outSize,MNISTDatabase data, String dataType) {
         double tab[][] = new double[array.size()][10];
@@ -103,6 +103,12 @@ public class NeuralUtil {
        //z System.out.println(map);
         return tab;
     }
+    /**
+     * Sets input layer values
+     * @param inputLayer Layer
+     * @param pattNr Pattern number from digits database
+     * @param images Values of pixels 
+     */
      public static void setInputLayer(Layer inputLayer, int pattNr,double[][][] images) {
         int index = 0;
         int length = images[pattNr].length;
@@ -114,12 +120,23 @@ public class NeuralUtil {
             }
         }
     }
+    
+     /**
+      * Sets output layer values
+      * @param pattNr Pattern number from digits database
+      * @param labels Labels values
+      * @return 
+      */
     public static double[] setOutputLayer(int pattNr, double[][] labels) {
          return labels[pattNr];
     }
 
-     /*
-     * Tworzy tabice z numerami wzorcow (jednakowy rozrzut pomiedzy wzorcami)
+     /**
+     * Make an array with random patterns from database.
+     * @param array Array which contains previously selected patterns
+     * @param patternCount Count of all needed patterns.
+     * @param startPattern Pattern number from which we shoud start taking other patterns.
+     * @param endPattern Last pattern number.
      */
     public static void setPatterns(ArrayList array,int patternCount,int startPattern, int endPattern) {
         int size = endPattern - startPattern + 1;
@@ -128,8 +145,10 @@ public class NeuralUtil {
                 if (i % (size/patternCount) == 0) array.add(i);
         }
     }
-        /*
-     * Losowanie liczb z zadanego przedzialu [a,b] do tablicy
+     /** 
+     * The randomisation of numbers to an array list.
+     * @param array The list where random numbers are stored.
+     * @return List which contains random numbers.
      */
     public static List randomizePatterns(ArrayList<Integer> array) {
         ArrayList<Integer> list = new ArrayList();
@@ -243,9 +262,15 @@ private static double[][] OtsuTreshold(int[][] data, double min, double max) {
         return data1;
     }
 
-     /*
-     * Dokonuje normalizacji danych do wybranego przedzialu
-     */
+     /**
+       * Normalize values to selected range.
+       * @param value Select value.
+       * @param max Maximal value of all values in actual range.
+       * @param min Minimal value of all values in actual range.
+       * @param new_max New maximal value.
+       * @param new_min New minimal value.
+       * @return New normalized value.
+       */
       private static double normalize(int value,int max,int min,double new_max,double new_min) {
             double new_value = (double) (new_max - new_min) * (value - min) / (max - min) + new_min;
             return new_value;
@@ -301,6 +326,11 @@ private static double[][] OtsuTreshold(int[][] data, double min, double max) {
     public static double calculateClassError(int badRecognizedCount, int patternsCount) {
         return NeuralUtil.roundToDecimals(100 - badRecognizedCount/(double)patternsCount*100,2);
     }
+    /**
+     * Return seed for randomisation. Seed depends on file name - it takes number of probe
+     * for ex. for probes 21, 23 seed are 21 and 23.
+     * @return Seed for random number generator.
+     */
     public static long getSeed() {
         String wFile = GPathReader.getWeightsFileName();
         long seed;
